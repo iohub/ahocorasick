@@ -20,6 +20,7 @@ type MItem struct {
 	Freq  int
 }
 
+// MPos provides matched position in source sequence and substring output id of list
 type MPos struct {
 	Pos   int
 	OutID int

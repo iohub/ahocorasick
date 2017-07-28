@@ -266,10 +266,10 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	*/
-	//TestAEnglish()
+	TestAEnglish()
 	TestBEnglish()
 	TestCEnglish()
-	//TestAChinese()
+	TestAChinese()
 	TestBChinese()
 	TestCChinese()
 }
