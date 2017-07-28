@@ -20,7 +20,8 @@ func TestDumpMatcher(t *testing.T) {
 	m.DumpGraph("dfa.gv")
 	seq := []byte("hershertongher")
 	fmt.Printf("searching %s\n", string(seq))
-	req := m.Search(seq)
+	mp := m.Match(seq)
+	req := m.ExportMItem(seq, mp)
 	for _, item := range req {
 		fmt.Printf("key:%s value:%d\n", item.Key, item.Value.(int))
 	}
@@ -56,7 +57,8 @@ func TestMatcherInsert(t *testing.T) {
 	//m.DumpGraph("bigdfa.py")
 	seq := []byte("一丁不识一丁点C++的T桖中华人民共和国人民解放军轰炸南京长江大桥")
 	fmt.Printf("Searching %s\n", string(seq))
-	req := m.Search(seq)
+	mp := m.Match(seq)
+	req := m.ExportMItem(seq, mp)
 	for _, item := range req {
 		fmt.Printf("key:%s value:%d\n", item.Key, item.Value.(int))
 	}

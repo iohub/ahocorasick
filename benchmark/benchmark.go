@@ -89,12 +89,6 @@ func TestAEnglish() {
 	end = time.Now()
 
 	fmt.Printf("search cost:%d(ms)\n", (end.UnixNano()-start.UnixNano())/(1000*1000))
-
-	/*
-		for _, v := range res {
-			fmt.Printf("%d\n", v)
-		}
-	*/
 }
 
 func TestAChinese() {
@@ -125,12 +119,6 @@ func TestAChinese() {
 	end = time.Now()
 
 	fmt.Printf("search cost:%d(ms)\n", (end.UnixNano()-start.UnixNano())/(1000*1000))
-
-	/*
-		for _, v := range res {
-			fmt.Printf("%d\n", v)
-		}
-	*/
 }
 
 func TestBEnglish() {
@@ -165,11 +153,7 @@ func TestBEnglish() {
 	m.MultiPatternSearch(contentRune, false)
 	end = time.Now()
 	fmt.Printf("search cost:%d(ms)\n", (end.UnixNano()-start.UnixNano())/(1000*1000))
-	/*
-		for _, t := range terms {
-			fmt.Printf("%d %s\n", t.Pos, string(t.Word))
-		}
-	*/
+
 }
 
 func TestBChinese() {
@@ -204,11 +188,7 @@ func TestBChinese() {
 	m.MultiPatternSearch(contentRune, false)
 	end = time.Now()
 	fmt.Printf("search cost:%d(ms)\n", (end.UnixNano()-start.UnixNano())/(1000*1000))
-	/*
-		for _, t := range terms {
-			fmt.Printf("%d %s\n", t.Pos, string(t.Word))
-		}
-	*/
+
 }
 
 func TestCEnglish() {
@@ -237,16 +217,10 @@ func TestCEnglish() {
 		m.Insert(b, i)
 	}
 	m.Compile()
-	m.Search(content)
+	m.Match(content)
 	end = time.Now()
 
 	fmt.Printf("search cost:%d(ms)\n", (end.UnixNano()-start.UnixNano())/(1000*1000))
-
-	/*
-		for _, v := range res {
-			fmt.Printf("%d\n", v)
-		}
-	*/
 }
 
 func TestCChinese() {
@@ -277,7 +251,7 @@ func TestCChinese() {
 		m.Insert(b, i)
 	}
 	m.Compile()
-	m.Search(content)
+	m.Match(content)
 	end = time.Now()
 	fmt.Printf("search cost:%d(ms)\n", (end.UnixNano()-start.UnixNano())/(1000*1000))
 
@@ -292,10 +266,10 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	*/
-	TestAEnglish()
+	//TestAEnglish()
 	TestBEnglish()
 	TestCEnglish()
-	TestAChinese()
+	//TestAChinese()
 	TestBChinese()
 	TestCChinese()
 }
