@@ -10,13 +10,10 @@ This package is not thread safe if there is one goroutine doing insertions or de
 
 [`cloudflare`](https://github.com/cloudflare/ahocorasick) [`anknown`](https://github.com/anknown/ahocorasick) [`iohub`](https://github.com/iohub/Ahocorasick)
 
-* Build time
   ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Build.png)
 
-* Match time
   ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Match.png)
 
-* Memory usage
   ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Memory.png)
 
 How to run benchmark
