@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"runtime"
 	"time"
+
+	_ "net/http/pprof"
 
 	"github.com/anknown/ahocorasick"
 	"github.com/cloudflare/ahocorasick"
@@ -195,4 +198,5 @@ func main() {
 	testB(zhDict, zhText)
 	testC(zhDict, zhText)
 
+	http.ListenAndServe(":8080", http.DefaultServeMux)
 }

@@ -9,7 +9,7 @@ import (
 // Matcher Aho Corasick Matcher
 type Matcher struct {
 	da     *Cedar
-	output []*list.List
+	output []outNode
 	fails  []int
 }
 
@@ -24,6 +24,11 @@ type MItem struct {
 type MPos struct {
 	Pos   int
 	OutID int
+}
+
+type outNode struct {
+	Link *outNode
+	vKey int
 }
 
 func NewMatcher() *Matcher {
@@ -62,7 +67,8 @@ func (m *Matcher) Compile() {
 	for id := 0; id < nLen; id++ {
 		m.fails[id] = -1
 	}
-	m.output = make([]*list.List, nLen)
+	//vLen := len(m.da.vals)
+	m.output = make([]outNode, nLen)
 	fs := 0
 	m.fails[fs] = fs
 	m.convert()
@@ -105,13 +111,10 @@ func (m *Matcher) ExportMItem(seq []byte, mp []MPos) []MItem {
 
 func (m *Matcher) mItemOf(seq []byte, offset, id int) []MItem {
 	req := []MItem{}
-	if m.output[id] == nil {
-		return req
-	}
-	l := m.output[id]
-	for e := l.Front(); e != nil; e = e.Next() {
-		len := e.Value.(nvalue).len
-		val := e.Value.(nvalue).Value
+	for e := &m.output[id]; e != nil; e = e.Link {
+		nval := m.da.vals[e.vKey]
+		len := nval.len
+		val := nval.Value
 		if len == 0 {
 			continue
 		}
@@ -121,13 +124,8 @@ func (m *Matcher) mItemOf(seq []byte, offset, id int) []MItem {
 	return req
 }
 
-func (m *Matcher) addOutput(nid int, nval nvalue) {
-	if m.output[nid] == nil {
-		m.output[nid] = &list.List{}
-	}
-	l := m.output[nid]
-	// fmt.Printf("push sublen:%d\n", len)
-	l.PushBack(nval)
+func (m *Matcher) addOutput(nid, fid int) {
+	m.output[nid].Link = &m.output[fid]
 }
 
 func (m *Matcher) convert() {
@@ -146,7 +144,7 @@ func (m *Matcher) convert() {
 		nid := e.Value.(ndesc).ID
 		if da.isEnd(nid) {
 			vk, _ := da.vKeyOf(nid)
-			m.addOutput(nid, da.vals[vk])
+			m.output[nid].vKey = vk
 		}
 		chds := da.childs(nid)
 		for _, c := range chds {
@@ -160,8 +158,7 @@ func (m *Matcher) convert() {
 			}
 			m.fails[c.ID] = fid
 			if da.isEnd(fid) {
-				vk, _ := da.vKeyOf(fid)
-				m.addOutput(c.ID, da.vals[vk])
+				m.addOutput(c.ID, fid)
 			}
 		}
 	}
