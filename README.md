@@ -5,6 +5,32 @@ Package `Ahocorasick` implementes fast, compact and low memory used aho-corasick
 `cedar-go` is a [Golang](https://golang.org/) port of [cedar](http://www.tkl.iis.u-tokyo.ac.jp/~ynaga/cedar) which is written in C++ by Naoki Yoshinaga. [`cedar-go`](https://github.com/adamzy/cedar-go) currently implements the `reduced` verion of cedar. 
 This package is not thread safe if there is one goroutine doing insertions or deletions. 
 
+
+## Benchmark
+
+[`cloudflare`](https://github.com/cloudflare/ahocorasick) [`anknown`](https://github.com/anknown/ahocorasick) [`iohub`](https://github.com/iohub/Ahocorasick)
+
+* Build time
+  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Build.png)
+
+* Match time
+  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Match.png)
+
+* Memory usage
+  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Memory.png)
+
+How to run benchmark
+
+```
+git clone https://github.com/iohub/Ahocorasick
+cd benchmark
+go get github.com/cloudflare/ahocorasick
+go get github.com/anknown/ahocorasick
+go get github.com/iohub/Ahocorasick
+go build .
+./benchmark
+```
+
 ## Install
 ```
 go get github.com/iohub/Ahocorasick
