@@ -1,6 +1,6 @@
 # Ahocorasick [![GoDoc](https://godoc.org/github.com/iohub/Ahocorasick?status.svg)](https://godoc.org/github.com/iohub/Ahocorasick)
 
-Package `Ahocorasick` implementes fast, compact and low memory used aho-corasick algorithm based on double-array trie. and also supports visualizing inner data structures by [graphviz](http://graphviz.org) 
+Package `Ahocorasick` implementes fast, compact and low memory used aho-corasick algorithm based on efficiently-updatable double-array trie (cedar). and also supports visualizing inner data structures by [graphviz](http://graphviz.org) 
 
 `cedar-go` is a [Golang](https://golang.org/) port of [cedar](http://www.tkl.iis.u-tokyo.ac.jp/~ynaga/cedar) which is written in C++ by Naoki Yoshinaga. [`cedar-go`](https://github.com/adamzy/cedar-go) currently implements the `reduced` verion of cedar. 
 This package is not thread safe if there is one goroutine doing insertions or deletions. 
