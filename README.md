@@ -8,7 +8,7 @@ This package is not thread safe if there is one goroutine doing insertions or de
 
 ## Benchmark
 
-[`cloudflare`](https://github.com/cloudflare/ahocorasick) [`anknown`](https://github.com/anknown/ahocorasick) [`iohub`](https://github.com/iohub/Ahocorasick)
+ahocorasick golang implementation: [`cloudflare`](https://github.com/cloudflare/ahocorasick) [`anknown`](https://github.com/anknown/ahocorasick) [`iohub`](https://github.com/iohub/Ahocorasick)
 
   ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Build.png)
 
