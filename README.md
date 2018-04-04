@@ -6,27 +6,6 @@ Package `Ahocorasick` implementes fast, compact and low memory used aho-corasick
 This package is not thread safe if there is one goroutine doing insertions or deletions. 
 
 
-## Benchmark
-
-ahocorasick golang implementation: [`cloudflare`](https://github.com/cloudflare/ahocorasick) [`anknown`](https://github.com/anknown/ahocorasick) [`iohub`](https://github.com/iohub/Ahocorasick)
-
-  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Build.png)
-
-  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Match.png)
-
-  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Memory.png)
-
-How to run benchmark
-
-```
-git clone https://github.com/iohub/Ahocorasick
-cd benchmark
-go get github.com/cloudflare/ahocorasick
-go get github.com/anknown/ahocorasick
-go get github.com/iohub/Ahocorasick
-go build .
-./benchmark
-```
 
 ## Install
 ```
@@ -155,3 +134,27 @@ dot -Tpng -o out.png trie.gv
 * aho-corasick
 
 ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/dfa.png)
+
+
+
+## Benchmark
+
+ahocorasick golang implementation: [`cloudflare`](https://github.com/cloudflare/ahocorasick) [`anknown`](https://github.com/anknown/ahocorasick) [`iohub`](https://github.com/iohub/Ahocorasick)
+
+  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Build.png)
+
+  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Match.png)
+
+  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Memory.png)
+
+How to run benchmark
+
+```
+git clone https://github.com/iohub/Ahocorasick
+cd benchmark
+go get github.com/cloudflare/ahocorasick
+go get github.com/anknown/ahocorasick
+go get github.com/iohub/Ahocorasick
+go build .
+./benchmark
+```
