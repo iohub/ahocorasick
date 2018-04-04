@@ -509,6 +509,10 @@ func (da *Cedar) isEnd(id int) bool {
 	return da.infos[id].Child == 0
 }
 
+func (da *Cedar) toEnd(id int) {
+	da.infos[id].End = true
+}
+
 func dumpDFAHeader(out *bytes.Buffer) {
 	out.WriteString("digraph DFA {\n")
 	out.WriteString("\tnode [color=lightblue2 style=filled]\n")
