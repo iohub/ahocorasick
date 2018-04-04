@@ -71,7 +71,8 @@ func (m *Matcher) Compile() {
 	m.output = make([]outNode, nLen)
 	fs := 0
 	m.fails[fs] = fs
-	m.convert()
+	m.buildFails()
+	m.buildOutputs()
 }
 
 // Matching multiple subsequence in seq return MPos (matched position and output id)
@@ -128,7 +129,18 @@ func (m *Matcher) addOutput(nid, fid int) {
 	m.output[nid].Link = &m.output[fid]
 }
 
-func (m *Matcher) convert() {
+func (m *Matcher) buildOutputs() {
+	da := m.da
+	for nid, fid := range m.fails {
+		if fid == -1 || !da.isEnd(fid) {
+			continue
+		}
+		da.toEnd(nid)
+		m.addOutput(nid, fid)
+	}
+}
+
+func (m *Matcher) buildFails() {
 	q := &list.List{}
 	da, ro := m.da, 0
 	m.fails[ro] = ro
@@ -157,9 +169,6 @@ func (m *Matcher) convert() {
 				}
 			}
 			m.fails[c.ID] = fid
-			if da.isEnd(fid) {
-				m.addOutput(c.ID, fid)
-			}
 		}
 	}
 }
