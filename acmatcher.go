@@ -69,9 +69,10 @@ func (m *Matcher) Compile() {
 	}
 	//vLen := len(m.da.vals)
 	m.output = make([]outNode, nLen)
-	fs := 0
-	m.fails[fs] = fs
+	m.fails[0] = 0
+	// build fail function, generate NFA
 	m.buildFails()
+	// build output function, generate DFA
 	m.buildOutputs()
 }
 
