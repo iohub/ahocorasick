@@ -8,21 +8,22 @@ import (
 
 // Matcher Aho Corasick Matcher
 type Matcher struct {
-	da     *Cedar
-	output []outNode
-	fails  []int
+	da       *Cedar
+	output   []outNode
+	fails    []int
+	compiled bool
 }
 
-// MItem matched item in Aho Corasick Matcher
-type MItem struct {
+// MatchToken matched words in Aho Corasick Matcher
+type MatchToken struct {
 	Key   []byte
 	Value interface{}
-	Freq  int
+	At    int
+	Freq  uint
 }
 
-// MPos provides matched position in source sequence and substring output id of list
-type MPos struct {
-	Pos   int
+type matchAt struct {
+	At    int
 	OutID int
 }
 
@@ -33,7 +34,7 @@ type outNode struct {
 
 // NewMatcher new an aho corasick matcher
 func NewMatcher() *Matcher {
-	return &Matcher{da: NewCedar()}
+	return &Matcher{da: NewCedar(), compiled: false}
 }
 
 // DumpGraph dumps aho-corasick dfa structures to graphviz file
@@ -61,28 +62,29 @@ func (m *Matcher) Cedar() *Cedar {
 func (m *Matcher) Compile() {
 	nLen := len(m.da.array)
 	// alloc fails, output table space
-	if len(m.fails) != 0 || len(m.output) != 0 {
+	if m.compiled {
 		panic("Matcher already Compiled")
 	}
 	m.fails = make([]int, nLen)
 	for id := 0; id < nLen; id++ {
 		m.fails[id] = -1
 	}
-	//vLen := len(m.da.vals)
+
 	m.output = make([]outNode, nLen)
 	m.fails[0] = 0
 	// build fail function, generate NFA
 	m.buildFails()
 	// build output function, generate DFA
 	m.buildOutputs()
+	m.compiled = true
 }
 
-// Match multiple subsequence in seq and return MPos (matched position and output id)
-func (m *Matcher) Match(seq []byte) []MPos {
-	if len(m.fails) == 0 || len(m.output) == 0 {
+// Match multiple subsequence in seq and return tokens
+func (m *Matcher) Match(seq []byte) []MatchToken {
+	if !m.compiled {
 		panic("Matcher must be compiled before searching!")
 	}
-	req := []MPos{}
+	at := []matchAt{}
 	nid := 0
 	da := m.da
 	for i, b := range seq {
@@ -90,7 +92,7 @@ func (m *Matcher) Match(seq []byte) []MPos {
 			if da.hasLabel(nid, b) {
 				nid, _ = da.child(nid, b)
 				if da.isEnd(nid) {
-					req = append(req, MPos{Pos: i, OutID: nid})
+					at = append(at, matchAt{At: i, OutID: nid})
 				}
 				break
 			}
@@ -100,20 +102,15 @@ func (m *Matcher) Match(seq []byte) []MPos {
 			nid = m.fails[nid]
 		}
 	}
-	return req
-}
-
-// ExportMItem export the key, value from MPos
-func (m *Matcher) ExportMItem(seq []byte, mp []MPos) []MItem {
-	req := []MItem{}
-	for _, p := range mp {
-		req = append(req, m.mItemOf(seq, p.Pos, p.OutID)...)
+	tokens := []MatchToken{}
+	for _, p := range at {
+		tokens = append(tokens, m.tokenOf(seq, p.At, p.OutID)...)
 	}
-	return req
+	return tokens
 }
 
-func (m *Matcher) mItemOf(seq []byte, offset, id int) []MItem {
-	req := []MItem{}
+func (m *Matcher) tokenOf(seq []byte, offset, id int) []MatchToken {
+	req := []MatchToken{}
 	for e := &m.output[id]; e != nil; e = e.Link {
 		nval := m.da.vals[e.vKey]
 		len := nval.len
@@ -122,7 +119,7 @@ func (m *Matcher) mItemOf(seq []byte, offset, id int) []MItem {
 			continue
 		}
 		bs := seq[offset-len+1 : offset+1]
-		req = append(req, MItem{Key: bs, Value: val})
+		req = append(req, MatchToken{Key: bs, Value: val, At: offset})
 	}
 	return req
 }
