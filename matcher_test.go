@@ -48,13 +48,13 @@ func TestMatcherInsert(t *testing.T) {
 		}
 	}()
 
-	//m.da.DumpGraph("bigtrie.py")
+	// m.da.DumpGraph("bigtrie.py")
 	fmt.Println("Compile...")
 	func() {
 		defer timeTrack(time.Now(), "Compile")
 		m.Compile()
 	}()
-	//m.DumpGraph("bigdfa.py")
+	// m.DumpGraph("bigdfa.py")
 	seq := []byte("一丁不识一丁点C++的T桖中华人民共和国人民解放军轰炸南京长江大桥")
 	fmt.Printf("Searching %s\n", string(seq))
 	mp := m.Match(seq)
@@ -63,5 +63,5 @@ func TestMatcherInsert(t *testing.T) {
 		fmt.Printf("key:%s value:%d\n", item.Key, item.Value.(int))
 	}
 	fmt.Printf("Waiting for user CTL+C...\n")
-	time.Sleep(60 * time.Second)
+	time.Sleep(15 * time.Second)
 }

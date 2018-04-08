@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 )
 
+// defines max & min value of chinese CJK code
 const (
 	valueLimit = int(^uint(0) >> 1)
 	CJKZhMin   = '\u4E00'
@@ -48,6 +49,7 @@ func (b *block) init() {
 	b.reject = 257
 }
 
+// Cedar encapsulates a fast and compressed double array trie for words query
 type Cedar struct {
 	array    []node
 	infos    []ninfo
@@ -64,6 +66,7 @@ type Cedar struct {
 	maxTrial int
 }
 
+// NewCedar new a Cedar instance
 func NewCedar() *Cedar {
 	da := Cedar{
 		array:    make([]node, 256),
@@ -432,13 +435,13 @@ func (da *Cedar) resolve(fromN, baseN int, labelN byte) int {
 	}
 	base ^= int(children[0])
 	var from int
-	var base_ int
+	var nbase int
 	if flag {
 		from = fromN
-		base_ = baseN
+		nbase = baseN
 	} else {
 		from = fromP
-		base_ = baseP
+		nbase = baseP
 	}
 	if flag && children[0] == labelN {
 		da.infos[from].Child = labelN
@@ -446,21 +449,21 @@ func (da *Cedar) resolve(fromN, baseN int, labelN byte) int {
 	da.array[from].Value = -base - 1
 	for i := 0; i < len(children); i++ {
 		to := da.popEnode(base, children[i], from)
-		to_ := base_ ^ int(children[i])
+		nto := nbase ^ int(children[i])
 		if i == len(children)-1 {
 			da.infos[to].Sibling = 0
 		} else {
 			da.infos[to].Sibling = children[i+1]
 		}
-		if flag && to_ == toPN { // new node has no child
+		if flag && nto == toPN { // new node has no child
 			continue
 		}
 		n := &da.array[to]
-		n_ := &da.array[to_]
-		n.Value = n_.Value
+		nn := &da.array[nto]
+		n.Value = nn.Value
 		if n.Value < 0 && children[i] != 0 {
 			// this node has children, fix their check
-			c := da.infos[to_].Child
+			c := da.infos[nto].Child
 			da.infos[to].Child = c
 			da.array[n.base()^int(c)].Check = to
 			c = da.infos[n.base()^int(c)].Sibling
@@ -469,16 +472,16 @@ func (da *Cedar) resolve(fromN, baseN int, labelN byte) int {
 				c = da.infos[n.base()^int(c)].Sibling
 			}
 		}
-		if !flag && to_ == fromN { // parent node moved
+		if !flag && nto == fromN { // parent node moved
 			fromN = to
 		}
-		if !flag && to_ == toPN {
+		if !flag && nto == toPN {
 			da.pushSibling(fromN, toPN^int(labelN), labelN, true)
-			da.infos[to_].Child = 0
-			n_.Value = valueLimit
-			n_.Check = fromN
+			da.infos[nto].Child = 0
+			nn.Value = valueLimit
+			nn.Check = fromN
 		} else {
-			da.pushEnode(to_)
+			da.pushEnode(nto)
 		}
 	}
 	if flag {
@@ -547,6 +550,7 @@ func (da *Cedar) dumpTrie(out *bytes.Buffer) {
 	}
 }
 
+// DumpGraph dumps inner data structures for graphviz
 func (da *Cedar) DumpGraph(fname string) {
 	out := &bytes.Buffer{}
 	dumpDFAHeader(out)
