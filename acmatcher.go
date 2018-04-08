@@ -31,11 +31,12 @@ type outNode struct {
 	vKey int
 }
 
+// NewMatcher new an aho corasick matcher
 func NewMatcher() *Matcher {
 	return &Matcher{da: NewCedar()}
 }
 
-// Export aho-corasick dfa structures to graphviz file
+// DumpGraph dumps aho-corasick dfa structures to graphviz file
 func (m *Matcher) DumpGraph(fname string) {
 	out := &bytes.Buffer{}
 	da := m.da
@@ -76,7 +77,7 @@ func (m *Matcher) Compile() {
 	m.buildOutputs()
 }
 
-// Matching multiple subsequence in seq return MPos (matched position and output id)
+// Match multiple subsequence in seq and return MPos (matched position and output id)
 func (m *Matcher) Match(seq []byte) []MPos {
 	if len(m.fails) == 0 || len(m.output) == 0 {
 		panic("Matcher must be compiled before searching!")
@@ -102,7 +103,7 @@ func (m *Matcher) Match(seq []byte) []MPos {
 	return req
 }
 
-// Export the key, value from MPos
+// ExportMItem export the key, value from MPos
 func (m *Matcher) ExportMItem(seq []byte, mp []MPos) []MItem {
 	req := []MItem{}
 	for _, p := range mp {

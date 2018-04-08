@@ -449,21 +449,21 @@ func (da *Cedar) resolve(fromN, baseN int, labelN byte) int {
 	da.array[from].Value = -base - 1
 	for i := 0; i < len(children); i++ {
 		to := da.popEnode(base, children[i], from)
-		nto := nbase ^ int(children[i])
+		newto := nbase ^ int(children[i])
 		if i == len(children)-1 {
 			da.infos[to].Sibling = 0
 		} else {
 			da.infos[to].Sibling = children[i+1]
 		}
-		if flag && nto == toPN { // new node has no child
+		if flag && newto == toPN { // new node has no child
 			continue
 		}
 		n := &da.array[to]
-		nn := &da.array[nto]
+		nn := &da.array[newto]
 		n.Value = nn.Value
 		if n.Value < 0 && children[i] != 0 {
 			// this node has children, fix their check
-			c := da.infos[nto].Child
+			c := da.infos[newto].Child
 			da.infos[to].Child = c
 			da.array[n.base()^int(c)].Check = to
 			c = da.infos[n.base()^int(c)].Sibling
@@ -472,16 +472,16 @@ func (da *Cedar) resolve(fromN, baseN int, labelN byte) int {
 				c = da.infos[n.base()^int(c)].Sibling
 			}
 		}
-		if !flag && nto == fromN { // parent node moved
+		if !flag && newto == fromN { // parent node moved
 			fromN = to
 		}
-		if !flag && nto == toPN {
+		if !flag && newto == toPN {
 			da.pushSibling(fromN, toPN^int(labelN), labelN, true)
-			da.infos[nto].Child = 0
+			da.infos[newto].Child = 0
 			nn.Value = valueLimit
 			nn.Check = fromN
 		} else {
-			da.pushEnode(nto)
+			da.pushEnode(newto)
 		}
 	}
 	if flag {

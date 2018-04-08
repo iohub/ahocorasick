@@ -2,6 +2,7 @@ package cedar
 
 import "errors"
 
+// defines Error type
 var (
 	ErrInvalidDataType = errors.New("cedar: invalid datatype")
 	ErrInvalidValue    = errors.New("cedar: invalid value")
