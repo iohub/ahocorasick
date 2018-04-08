@@ -1,4 +1,5 @@
-# Ahocorasick [![GoDoc](https://godoc.org/github.com/iohub/Ahocorasick?status.svg)](https://godoc.org/github.com/iohub/Ahocorasick)
+# Ahocorasick 
+[![Go Report Card](https://goreportcard.com/badge/github.com/iohub/Ahocorasick?style=flat-square)](https://goreportcard.com/report/github.com/iohub/Ahocorasick) [![GoDoc](https://godoc.org/github.com/iohub/Ahocorasick?status.svg)](https://godoc.org/github.com/iohub/Ahocorasick)
 
 Package `Ahocorasick` implementes fast, compact and low memory used aho-corasick algorithm based on double-array trie. and also supports visualizing inner data structures by [graphviz](http://graphviz.org) 
 
