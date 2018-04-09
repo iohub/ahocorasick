@@ -80,7 +80,7 @@ func (m *Matcher) Compile() {
 }
 
 // Match multiple subsequence in seq and return tokens
-func (m *Matcher) Match(seq []byte) []MatchToken {
+func (m *Matcher) Match(seq []byte) []*MatchToken {
 	if !m.compiled {
 		panic(ErrNotCompile)
 	}
@@ -105,22 +105,21 @@ func (m *Matcher) Match(seq []byte) []MatchToken {
 			nid = m.fails[nid]
 		}
 	}
-	tokens := []MatchToken{}
+	tokens := []*MatchToken{}
 	for _, p := range atbuf.buf {
 		tokens = append(tokens, m.matchOf(seq, p.At, p.OutID)...)
-		// m.matchOf(seq, p.At, p.OutID)
 	}
 	return tokens
 }
 
 // TokenOf extract matched token in seq
-func (m *Matcher) TokenOf(seq []byte, t MatchToken) []byte {
+func (m *Matcher) TokenOf(seq []byte, t *MatchToken) []byte {
 	key := seq[t.At-t.KLen+1 : t.At+1]
 	return key
 }
 
-func (m *Matcher) matchOf(seq []byte, offset, id int) []MatchToken {
-	req := []MatchToken{}
+func (m *Matcher) matchOf(seq []byte, offset, id int) []*MatchToken {
+	req := []*MatchToken{}
 	for e := &m.output[id]; e != nil; e = e.Link {
 		nval := m.da.vals[e.vKey]
 		len := nval.len
@@ -128,7 +127,7 @@ func (m *Matcher) matchOf(seq []byte, offset, id int) []MatchToken {
 		if len == 0 {
 			continue
 		}
-		req = append(req, MatchToken{Value: val, At: offset, KLen: len})
+		req = append(req, &MatchToken{Value: val, At: offset, KLen: len})
 	}
 	return req
 }
