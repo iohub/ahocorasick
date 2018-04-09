@@ -206,11 +206,8 @@ key:桥 value:187704
 
 ahocorasick golang implementation: [`cloudflare`](https://github.com/cloudflare/ahocorasick) [`anknown`](https://github.com/anknown/ahocorasick) [`iohub`](https://github.com/iohub/Ahocorasick)
 
-  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Build.png)
+  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/merge_from_ofoct.jpg)
 
-  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Match.png)
-
-  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/Memory.png)
 
 How to run benchmark
 
