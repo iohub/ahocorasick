@@ -16,9 +16,10 @@ type Matcher struct {
 
 // MatchToken matched words in Aho Corasick Matcher
 type MatchToken struct {
-	Key   []byte
+	// Key   []byte
+	KLen  int // len of key
 	Value interface{}
-	At    int
+	At    int // match position of source text
 	Freq  uint
 }
 
@@ -61,9 +62,8 @@ func (m *Matcher) Cedar() *Cedar {
 // Compile trie to aho-corasick
 func (m *Matcher) Compile() {
 	nLen := len(m.da.array)
-	// alloc fails, output table space
 	if m.compiled {
-		panic("Matcher already Compiled")
+		panic(ErrAlreadyCompiled)
 	}
 	m.fails = make([]int, nLen)
 	for id := 0; id < nLen; id++ {
@@ -82,9 +82,10 @@ func (m *Matcher) Compile() {
 // Match multiple subsequence in seq and return tokens
 func (m *Matcher) Match(seq []byte) []MatchToken {
 	if !m.compiled {
-		panic("Matcher must be compiled before searching!")
+		panic(ErrNotCompile)
 	}
-	at := []matchAt{}
+	atbuf := newAtBuffer(len(seq) / 3 * 2)
+	mat := matchAt{}
 	nid := 0
 	da := m.da
 	for i, b := range seq {
@@ -92,7 +93,9 @@ func (m *Matcher) Match(seq []byte) []MatchToken {
 			if da.hasLabel(nid, b) {
 				nid, _ = da.child(nid, b)
 				if da.isEnd(nid) {
-					at = append(at, matchAt{At: i, OutID: nid})
+					mat.OutID = nid
+					mat.At = i
+					atbuf.Append(mat)
 				}
 				break
 			}
@@ -103,13 +106,20 @@ func (m *Matcher) Match(seq []byte) []MatchToken {
 		}
 	}
 	tokens := []MatchToken{}
-	for _, p := range at {
-		tokens = append(tokens, m.tokenOf(seq, p.At, p.OutID)...)
+	for _, p := range atbuf.buf {
+		tokens = append(tokens, m.matchOf(seq, p.At, p.OutID)...)
+		// m.matchOf(seq, p.At, p.OutID)
 	}
 	return tokens
 }
 
-func (m *Matcher) tokenOf(seq []byte, offset, id int) []MatchToken {
+// TokenOf extract matched token in seq
+func (m *Matcher) TokenOf(seq []byte, t MatchToken) []byte {
+	key := seq[t.At-t.KLen+1 : t.At+1]
+	return key
+}
+
+func (m *Matcher) matchOf(seq []byte, offset, id int) []MatchToken {
 	req := []MatchToken{}
 	for e := &m.output[id]; e != nil; e = e.Link {
 		nval := m.da.vals[e.vKey]
@@ -118,8 +128,7 @@ func (m *Matcher) tokenOf(seq []byte, offset, id int) []MatchToken {
 		if len == 0 {
 			continue
 		}
-		bs := seq[offset-len+1 : offset+1]
-		req = append(req, MatchToken{Key: bs, Value: val, At: offset})
+		req = append(req, MatchToken{Value: val, At: offset, KLen: len})
 	}
 	return req
 }

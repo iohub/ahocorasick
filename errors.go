@@ -9,4 +9,7 @@ var (
 	ErrInvalidKey      = errors.New("cedar: invalid key")
 	ErrNoPath          = errors.New("cedar: no path")
 	ErrNoValue         = errors.New("cedar: no value")
+	ErrTooLarge        = errors.New("acmatcher: Tool Large for grow")
+	ErrNotCompile      = errors.New("acmatcher: matcher must be compiled")
+	ErrAlreadyCompiled = errors.New("acmatcher: matcher already compile")
 )

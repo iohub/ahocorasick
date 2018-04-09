@@ -44,7 +44,8 @@ func main() {
 	fmt.Printf("searching %s\n", string(seq))
 	req := m.Match(seq)
 	for _, item := range req {
-		fmt.Printf("key:%s value:%d\n", item.Key, item.Value.(int))
+		key := m.TokenOf(seq, item)
+		fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
 	}
 }
 

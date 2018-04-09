@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
+	"log"
 	"os"
 	"runtime"
+	"runtime/pprof"
 	"time"
 
 	_ "net/http/pprof"
@@ -70,7 +71,7 @@ func readRunes(filename string) ([][]rune, error) {
 	return dict, nil
 }
 
-func testA(dictName, textName string) {
+func testCloudflare(dictName, textName string) {
 	dict, err := readBytes(dictName)
 	if err != nil {
 		fmt.Println(err)
@@ -102,7 +103,7 @@ func testA(dictName, textName string) {
 	fmt.Printf("cloudflare/ahocorasick [mem] took %d KBytes\n", (after-before)/1024)
 }
 
-func testB(dictName, textName string) {
+func testAnknown(dictName, textName string) {
 	dict, err := readRunes(enDict)
 	if err != nil {
 		fmt.Println(err)
@@ -141,7 +142,7 @@ func testB(dictName, textName string) {
 	fmt.Printf("anknown/ahocorasick [mem] took %d KBytes\n", (after-before)/1024)
 }
 
-func testC(dictName, textName string) {
+func testIohub(dictName, textName string) {
 	dict, err := readBytes(enDict)
 	if err != nil {
 		fmt.Println(err)
@@ -180,23 +181,25 @@ func testC(dictName, textName string) {
 }
 
 func main() {
-	/*
-		f, err := os.Create("benchmark.bin")
-		if err != nil {
-			log.Fatal(err)
-		}
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
-	*/
+
+	f, err := os.Create("benchmark.prof")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
+
 	fmt.Println("\nBenchmark in english dict and text")
-	testA(enDict, enText)
-	testB(enDict, enText)
-	testC(enDict, enText)
+	// testCloudflare(enDict, enText)
+	// testAnknown(enDict, enText)
+	// testIohub(enDict, enText)
 
 	fmt.Println("\nBenchmark in chinese dict and text")
-	testA(zhDict, zhText)
-	testB(zhDict, zhText)
-	testC(zhDict, zhText)
+	// testCloudflare(zhDict, zhText)
+	testAnknown(zhDict, zhText)
+	testIohub(zhDict, zhText)
 
-	http.ListenAndServe(":8080", http.DefaultServeMux)
+	fmt.Println("\nCTL+C exit http pprof")
+	// http.ListenAndServe(":8087", http.DefaultServeMux)
 }
