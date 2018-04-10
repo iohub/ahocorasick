@@ -71,13 +71,13 @@ func readRunes(filename string) ([][]rune, error) {
 	return dict, nil
 }
 
-func testCloudflare(dictName, textName string) {
-	dict, err := readBytes(dictName)
+func testCloudflare(fdict, ftext string) {
+	dict, err := readBytes(fdict)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	content, err := ioutil.ReadFile(textName)
+	content, err := ioutil.ReadFile(ftext)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -103,14 +103,14 @@ func testCloudflare(dictName, textName string) {
 	fmt.Printf("cloudflare/ahocorasick [mem] took %d KBytes\n", (after-before)/1024)
 }
 
-func testAnknown(dictName, textName string) {
-	dict, err := readRunes(enDict)
+func testAnknown(fdict, ftext string) {
+	dict, err := readRunes(fdict)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	content, err := ioutil.ReadFile(enText)
+	content, err := ioutil.ReadFile(ftext)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -142,14 +142,14 @@ func testAnknown(dictName, textName string) {
 	fmt.Printf("anknown/ahocorasick [mem] took %d KBytes\n", (after-before)/1024)
 }
 
-func testIohub(dictName, textName string) {
-	dict, err := readBytes(enDict)
+func testIohub(fdict, ftext string) {
+	dict, err := readBytes(fdict)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	content, err := ioutil.ReadFile(enText)
+	content, err := ioutil.ReadFile(ftext)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -192,8 +192,8 @@ func main() {
 
 	fmt.Println("\nBenchmark in english dict and text")
 	// testCloudflare(enDict, enText)
-	// testAnknown(enDict, enText)
-	// testIohub(enDict, enText)
+	testAnknown(enDict, enText)
+	testIohub(enDict, enText)
 
 	fmt.Println("\nBenchmark in chinese dict and text")
 	// testCloudflare(zhDict, zhText)

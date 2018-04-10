@@ -1,7 +1,12 @@
 package cedar
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 )
@@ -32,7 +37,67 @@ func timeTrack(start time.Time, name string) {
 	fmt.Printf("%s took %s\n", name, elapsed)
 }
 
-func TestMatcherInsert(t *testing.T) {
+func readBytes(filename string) ([][]byte, error) {
+	dict := [][]byte{}
+
+	f, err := os.OpenFile(filename, os.O_RDONLY, 0660)
+	if err != nil {
+		return nil, err
+	}
+
+	r := bufio.NewReader(f)
+	for {
+		l, err := r.ReadBytes('\n')
+		if err != nil || err == io.EOF {
+			break
+		}
+		l = bytes.TrimSpace(l)
+		dict = append(dict, l)
+	}
+
+	return dict, nil
+}
+
+func calcTime(start time.Time, name string) {
+	elapsed := time.Since(start)
+	fmt.Printf("%s took %s\n", name, elapsed)
+}
+
+func testIohub(dictName, textName string) {
+	dict, err := readBytes(dictName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	content, err := ioutil.ReadFile(textName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	m := NewMatcher()
+
+	func() {
+		defer calcTime(time.Now(), "iohub/ahocorasick [build]")
+		for i, b := range dict {
+			m.Insert(b, i)
+		}
+		m.Compile()
+	}()
+
+	func() {
+		defer calcTime(time.Now(), "iohub/ahocorasick [match]")
+		m.Match(content)
+	}()
+}
+
+func TestWithDict(t *testing.T) {
+	zhDict := "./benchmark/cn/dictionary.txt"
+	zhText := "./benchmark/cn/text.txt"
+	testIohub(zhDict, zhText)
+}
+
+func TestMatcher(t *testing.T) {
 	fmt.Printf("\ntesting Insert & Compile & Search in big dictionary...\n")
 	m := NewMatcher()
 	fmt.Println("Loading...")
@@ -62,6 +127,4 @@ func TestMatcherInsert(t *testing.T) {
 		key := m.TokenOf(seq, item)
 		fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
 	}
-	fmt.Printf("Waiting for user CTL+C...\n")
-	time.Sleep(15 * time.Second)
 }
