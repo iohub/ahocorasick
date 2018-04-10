@@ -128,13 +128,11 @@ Generate png
 ```shell
 dot -Tpng -o out.png trie.gv
 ```
-* trie
+* trie 
+<img src="https://github.com/iohub/Ahocorasick/blob/master/pictures/trie.png" alt="GitHub" width="420" height="460" /> 
 
-![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/trie.png)
-
-* aho-corasick
-
-![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/dfa.png)
+* aho-corasick 
+<img src="https://github.com/iohub/Ahocorasick/blob/master/pictures/dfa.png" alt="GitHub" width="420" height="460" />
 
 
 ## Chinese words segment demo
