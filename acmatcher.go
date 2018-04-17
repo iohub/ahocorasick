@@ -7,8 +7,10 @@ import (
 )
 
 const (
-	// BufferSize size of match buffer
-	TokenBufferSize = 2048
+	// TokenBufferSize size of match token buffer
+	TokenBufferSize = 4096
+	// MatchBufferSize size of match position buffer
+	MatchBufferSize = 4096
 )
 
 // Matcher Aho Corasick Matcher
@@ -17,7 +19,8 @@ type Matcher struct {
 	output   []outNode
 	fails    []int
 	compiled bool
-	buf      *TokenBuffer
+	tokenbuf *FixedBuffer
+	matchbuf *FixedBuffer
 }
 
 // MatchToken matched words in Aho Corasick Matcher
@@ -38,38 +41,39 @@ type outNode struct {
 	vKey int
 }
 
-type TokenBuffer struct {
-	buf []MatchToken
-	idx int
-	cap int
+type iTokenBuffer struct{}
+
+func (tb *iTokenBuffer) init(fb *FixedBuffer, n int) {
+	fb.b = make([]MatchToken, n)
 }
 
-func (b *TokenBuffer) push(t *MatchToken) {
-	if b.idx >= b.cap {
-		panic("ERROR token buffer overflow")
-	}
-	b.buf[b.idx] = *t
-	b.idx++
+func (tb *iTokenBuffer) assign(fb *FixedBuffer, val interface{}) {
+	vb := fb.b.([]MatchToken)
+	vb[fb.idx] = *val.(*MatchToken)
 }
 
-func (b *TokenBuffer) reset() {
-	b.idx = 0
+var iTokenBufferOP = iTokenBuffer{}
+
+type iMatchBuffer struct{}
+
+func (tb *iMatchBuffer) init(fb *FixedBuffer, n int) {
+	fb.b = make([]matchAt, n)
 }
 
-func newTokenBuffer(n int) *TokenBuffer {
-	return &TokenBuffer{
-		buf: make([]MatchToken, n),
-		idx: 0,
-		cap: n,
-	}
+func (tb *iMatchBuffer) assign(fb *FixedBuffer, val interface{}) {
+	vb := fb.b.([]matchAt)
+	vb[fb.idx] = *val.(*matchAt)
 }
+
+var iMatchBufferOP = iMatchBuffer{}
 
 // NewMatcher new an aho corasick matcher
 func NewMatcher() *Matcher {
 	return &Matcher{
 		da:       NewCedar(),
 		compiled: false,
-		buf:      newTokenBuffer(TokenBufferSize),
+		tokenbuf: NewFixedBuffer(TokenBufferSize, &iTokenBufferOP),
+		matchbuf: NewFixedBuffer(MatchBufferSize, &iMatchBufferOP),
 	}
 }
 
@@ -119,15 +123,16 @@ func (m *Matcher) Match(seq []byte) []MatchToken {
 	if !m.compiled {
 		panic(ErrNotCompile)
 	}
-	atbuf := newAtBuffer(len(seq) / 3 * 2)
 	nid := 0
 	da := m.da
+	m.matchbuf.reset()
+	m.tokenbuf.reset()
 	for i, b := range seq {
 		for {
 			if da.hasLabel(nid, b) {
 				nid, _ = da.child(nid, b)
 				if da.isEnd(nid) {
-					atbuf.Append(matchAt{OutID: nid, At: i})
+					m.matchbuf.push(&matchAt{OutID: nid, At: i})
 				}
 				break
 			}
@@ -137,12 +142,12 @@ func (m *Matcher) Match(seq []byte) []MatchToken {
 			nid = m.fails[nid]
 		}
 	}
-	m.buf.reset()
-	for _, p := range atbuf.buf {
-		m.matchOf(seq, p.At, p.OutID)
+	mb := m.matchbuf.b.([]matchAt)
+	for i := 0; i < m.matchbuf.idx; i++ {
+		m.matchOf(seq, mb[i].At, mb[i].OutID)
 	}
-	tokens := m.buf.buf[:m.buf.idx]
-	return tokens
+	tb := m.tokenbuf.b.([]MatchToken)
+	return tb[:m.tokenbuf.idx]
 }
 
 // TokenOf extract matched token in seq
@@ -157,7 +162,7 @@ func (m *Matcher) matchOf(seq []byte, offset, id int) {
 		if nval.len == 0 {
 			continue
 		}
-		m.buf.push(&MatchToken{Value: nval.Value, At: offset, KLen: nval.len})
+		m.tokenbuf.push(&MatchToken{Value: nval.Value, At: offset, KLen: nval.len})
 	}
 }
 

@@ -201,12 +201,12 @@ func main() {
 	defer pprof.StopCPUProfile()
 
 	fmt.Println("\nBenchmark in english dict and text")
-	testCloudflare(enDict, enText)
+	// testCloudflare(enDict, enText)
 	testAnknown(enDict, enText)
 	testIohub(enDict, enText)
 
 	fmt.Println("\nBenchmark in chinese dict and text")
-	testCloudflare(zhDict, zhText)
+	// testCloudflare(zhDict, zhText)
 	testAnknown(zhDict, zhText)
 	testIohub(zhDict, zhText)
 
