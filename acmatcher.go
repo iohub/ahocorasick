@@ -146,7 +146,7 @@ func (m *Matcher) Match(seq []byte) []MatchToken {
 }
 
 // TokenOf extract matched token in seq
-func (m *Matcher) TokenOf(seq []byte, t *MatchToken) []byte {
+func (m *Matcher) TokenOf(seq []byte, t MatchToken) []byte {
 	key := seq[t.At-t.KLen+1 : t.At+1]
 	return key
 }

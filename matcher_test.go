@@ -27,7 +27,7 @@ func TestDumpMatcher(t *testing.T) {
 	fmt.Printf("searching %s\n", string(seq))
 	req := m.Match(seq)
 	for _, item := range req {
-		key := m.TokenOf(seq, &item)
+		key := m.TokenOf(seq, item)
 		fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
 	}
 }
@@ -134,7 +134,7 @@ func TestMatcher(t *testing.T) {
 	fmt.Printf("Searching %s\n", string(seq))
 	req := m.Match(seq)
 	for _, item := range req {
-		key := m.TokenOf(seq, &item)
+		key := m.TokenOf(seq, item)
 		fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
 	}
 }
