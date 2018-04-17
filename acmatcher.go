@@ -6,17 +6,22 @@ import (
 	"io/ioutil"
 )
 
+const (
+	// BufferSize size of match buffer
+	TokenBufferSize = 2048
+)
+
 // Matcher Aho Corasick Matcher
 type Matcher struct {
 	da       *Cedar
 	output   []outNode
 	fails    []int
 	compiled bool
+	buf      *TokenBuffer
 }
 
 // MatchToken matched words in Aho Corasick Matcher
 type MatchToken struct {
-	// Key   []byte
 	KLen  int // len of key
 	Value interface{}
 	At    int // match position of source text
@@ -33,9 +38,39 @@ type outNode struct {
 	vKey int
 }
 
+type TokenBuffer struct {
+	buf []MatchToken
+	idx int
+	cap int
+}
+
+func (b *TokenBuffer) push(t *MatchToken) {
+	if b.idx >= b.cap {
+		panic("ERROR token buffer overflow")
+	}
+	b.buf[b.idx] = *t
+	b.idx++
+}
+
+func (b *TokenBuffer) reset() {
+	b.idx = 0
+}
+
+func newTokenBuffer(n int) *TokenBuffer {
+	return &TokenBuffer{
+		buf: make([]MatchToken, n),
+		idx: 0,
+		cap: n,
+	}
+}
+
 // NewMatcher new an aho corasick matcher
 func NewMatcher() *Matcher {
-	return &Matcher{da: NewCedar(), compiled: false}
+	return &Matcher{
+		da:       NewCedar(),
+		compiled: false,
+		buf:      newTokenBuffer(TokenBufferSize),
+	}
 }
 
 // DumpGraph dumps aho-corasick dfa structures to graphviz file
@@ -80,12 +115,11 @@ func (m *Matcher) Compile() {
 }
 
 // Match multiple subsequence in seq and return tokens
-func (m *Matcher) Match(seq []byte) []*MatchToken {
+func (m *Matcher) Match(seq []byte) []MatchToken {
 	if !m.compiled {
 		panic(ErrNotCompile)
 	}
 	atbuf := newAtBuffer(len(seq) / 3 * 2)
-	mat := matchAt{}
 	nid := 0
 	da := m.da
 	for i, b := range seq {
@@ -93,9 +127,7 @@ func (m *Matcher) Match(seq []byte) []*MatchToken {
 			if da.hasLabel(nid, b) {
 				nid, _ = da.child(nid, b)
 				if da.isEnd(nid) {
-					mat.OutID = nid
-					mat.At = i
-					atbuf.Append(mat)
+					atbuf.Append(matchAt{OutID: nid, At: i})
 				}
 				break
 			}
@@ -105,10 +137,11 @@ func (m *Matcher) Match(seq []byte) []*MatchToken {
 			nid = m.fails[nid]
 		}
 	}
-	tokens := []*MatchToken{}
+	m.buf.reset()
 	for _, p := range atbuf.buf {
-		tokens = append(tokens, m.matchOf(seq, p.At, p.OutID)...)
+		m.matchOf(seq, p.At, p.OutID)
 	}
+	tokens := m.buf.buf[:m.buf.idx]
 	return tokens
 }
 
@@ -118,18 +151,14 @@ func (m *Matcher) TokenOf(seq []byte, t *MatchToken) []byte {
 	return key
 }
 
-func (m *Matcher) matchOf(seq []byte, offset, id int) []*MatchToken {
-	req := []*MatchToken{}
+func (m *Matcher) matchOf(seq []byte, offset, id int) {
 	for e := &m.output[id]; e != nil; e = e.Link {
 		nval := m.da.vals[e.vKey]
-		len := nval.len
-		val := nval.Value
-		if len == 0 {
+		if nval.len == 0 {
 			continue
 		}
-		req = append(req, &MatchToken{Value: val, At: offset, KLen: len})
+		m.buf.push(&MatchToken{Value: nval.Value, At: offset, KLen: nval.len})
 	}
-	return req
 }
 
 func (m *Matcher) addOutput(nid, fid int) {

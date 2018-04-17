@@ -171,7 +171,17 @@ func testIohub(fdict, ftext string) {
 
 	func() {
 		defer calcTime(time.Now(), "iohub/ahocorasick [match]")
-		m.Match(content)
+		clen := len(content)
+		tlen := 0
+		for s := 0; clen > 0; s += tlen {
+			tlen := cedar.TokenBufferSize / 2
+			if clen < tlen {
+				tlen = clen
+			}
+			text := content[s:tlen]
+			m.Match(text)
+			clen -= tlen
+		}
 	}()
 
 	runtime.GC()
@@ -191,12 +201,12 @@ func main() {
 	defer pprof.StopCPUProfile()
 
 	fmt.Println("\nBenchmark in english dict and text")
-	// testCloudflare(enDict, enText)
+	testCloudflare(enDict, enText)
 	testAnknown(enDict, enText)
 	testIohub(enDict, enText)
 
 	fmt.Println("\nBenchmark in chinese dict and text")
-	// testCloudflare(zhDict, zhText)
+	testCloudflare(zhDict, zhText)
 	testAnknown(zhDict, zhText)
 	testIohub(zhDict, zhText)
 

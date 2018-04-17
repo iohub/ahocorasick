@@ -27,7 +27,7 @@ func TestDumpMatcher(t *testing.T) {
 	fmt.Printf("searching %s\n", string(seq))
 	req := m.Match(seq)
 	for _, item := range req {
-		key := m.TokenOf(seq, item)
+		key := m.TokenOf(seq, &item)
 		fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
 	}
 }
@@ -87,7 +87,17 @@ func testIohub(dictName, textName string) {
 
 	func() {
 		defer calcTime(time.Now(), "iohub/ahocorasick [match]")
-		m.Match(content)
+		clen := len(content)
+		tlen := 0
+		for s := 0; clen > 0; s += tlen {
+			tlen := TokenBufferSize / 2
+			if clen < tlen {
+				tlen = clen
+			}
+			text := content[s:tlen]
+			m.Match(text)
+			clen -= tlen
+		}
 	}()
 }
 
@@ -124,7 +134,7 @@ func TestMatcher(t *testing.T) {
 	fmt.Printf("Searching %s\n", string(seq))
 	req := m.Match(seq)
 	for _, item := range req {
-		key := m.TokenOf(seq, item)
+		key := m.TokenOf(seq, &item)
 		fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
 	}
 }
