@@ -12,6 +12,7 @@ import (
 	"runtime/pprof"
 	"time"
 
+	"net/http"
 	_ "net/http/pprof"
 
 	"github.com/anknown/ahocorasick"
@@ -200,6 +201,9 @@ func main() {
 	pprof.StartCPUProfile(f)
 	defer pprof.StopCPUProfile()
 
+	go func() {
+		http.ListenAndServe(":8787", http.DefaultServeMux)
+	}()
 	fmt.Println("\nBenchmark in english dict and text")
 	// testCloudflare(enDict, enText)
 	testAnknown(enDict, enText)
@@ -211,5 +215,5 @@ func main() {
 	testIohub(zhDict, zhText)
 
 	fmt.Println("\nCTL+C exit http pprof")
-	// http.ListenAndServe(":8087", http.DefaultServeMux)
+	// time.Sleep(1 * time.Minute)
 }
