@@ -44,16 +44,6 @@ func TestInsertFloat(t *testing.T) {
 }
 
 func TestCedar_Save(t *testing.T) {
-	cd := createCedar(t)
-	formats := []string{"json", "gob"}
-	for _, format := range formats {
-		testCedarFormat(t, cd, format)
-	}
-
-}
-
-func createCedar(t *testing.T) *Cedar {
-	t.Helper()
 	cd := NewCedar()
 	words := []string{
 		"she", "hers", "her", "he",
@@ -61,7 +51,10 @@ func createCedar(t *testing.T) *Cedar {
 	for i, word := range words {
 		cd.Insert([]byte(word), i)
 	}
-	return cd
+	formats := []string{"json", "gob"}
+	for _, format := range formats {
+		testCedarFormat(t, cd, format)
+	}
 }
 
 func testCedarFormat(t *testing.T, cd *Cedar, format string) {
