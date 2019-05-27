@@ -32,8 +32,7 @@ func (da *Cedar) SaveToFile(fileName string, dataType string) error {
 	defer file.Close()
 	out := bufio.NewWriter(file)
 	defer out.Flush()
-	da.Save(out, dataType)
-	return nil
+	return da.Save(out, dataType)
 }
 
 // Load loads the cedar from an io.Writer,
