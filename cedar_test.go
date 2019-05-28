@@ -2,7 +2,6 @@ package cedar
 
 import (
 	"fmt"
-	"os"
 	"testing"
 )
 
