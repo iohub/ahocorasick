@@ -1,5 +1,7 @@
 # Ahocorasick 
-[![Go Report Card](https://goreportcard.com/badge/github.com/iohub/Ahocorasick?style=flat-square)](https://goreportcard.com/report/github.com/iohub/Ahocorasick) [![Build Status](https://semaphoreci.com/api/v1/iohub/ahocorasick/branches/master/badge.svg)](https://semaphoreci.com/iohub/ahocorasick) [![GoCover](http://gocover.io/_badge/github.com/iohub/Ahocorasick)](http://gocover.io/github.com/iohub/Ahocorasick) [![GoDoc](https://godoc.org/github.com/iohub/Ahocorasick?status.svg)](https://godoc.org/github.com/iohub/Ahocorasick)
+[![Go Report Card](https://goreportcard.com/badge/github.com/iohub/Ahocorasick?style=flat-square)](https://goreportcard.com/report/github.com/iohub/Ahocorasick) [![GoCover](http://gocover.io/_badge/github.com/iohub/Ahocorasick)](http://gocover.io/github.com/iohub/Ahocorasick) [![GoDoc](https://godoc.org/github.com/iohub/Ahocorasick?status.svg)](https://godoc.org/github.com/iohub/Ahocorasick)
+
+<!--  [![Build Status](https://semaphoreci.com/api/v1/iohub/ahocorasick/branches/master/badge.svg)](https://semaphoreci.com/iohub/ahocorasick) -->
 
 Package `Ahocorasick` implementes fast, compact and low memory used aho-corasick algorithm based on double-array trie. and also supports visualizing inner data structures by [graphviz](http://graphviz.org) 
 
