@@ -33,6 +33,7 @@ m.DumpGraph("dfa.gv")
 Generate png 
 ```shell
 dot -Tpng -o out.png trie.gv
+# example: words {"she", "he", "her", "hers"}
 ```
 * trie 
 <img src="https://github.com/iohub/Ahocorasick/blob/master/pictures/trie.png" alt="GitHub" /> 
@@ -184,20 +185,7 @@ key:解放 value:287374
 key:放 value:160645
 key:人民解放军 value:25927
 key:解放军 value:287381
-key:军 value:46587
-key:轰 value:302585
-key:轰炸 value:302617
-key:炸 value:214859
-key:南 value:64826
-key:南京 value:64860
-key:京 value:24978
-key:长 value:321363
-key:长江 value:321685
-key:江 value:198725
-key:南京长江大桥 value:64899
-key:长江大桥 value:321699
-key:大桥 value:98737
-key:桥 value:187704
+...
 ```
 
 
