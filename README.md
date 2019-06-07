@@ -9,10 +9,41 @@ Package `Ahocorasick` implementes fast, compact and low memory used aho-corasick
 This package is not thread safe if there is one goroutine doing insertions or deletions. 
 
 
+## Visualize
+
+Install graphviz
+
+```shell
+# for mac os
+brew install graphviz
+# for ubuntu
+sudo apt-get install graphviz
+```
+
+Dump structure in golang
+```go
+m := cedar.NewMatcher()
+m.Insert...
+m.Compile...
+// dump trie graph in double array trie
+m.Cedar().DumpGraph("trie.gv")
+// dump aho-corasick dfa graph in double array trie
+m.DumpGraph("dfa.gv")
+```
+Generate png 
+```shell
+dot -Tpng -o out.png trie.gv
+```
+* trie 
+<img src="https://github.com/iohub/Ahocorasick/blob/master/pictures/trie.png" alt="GitHub" /> 
+
+* aho-corasick 
+<img src="https://github.com/iohub/Ahocorasick/blob/master/pictures/dfa.png" alt="GitHub" />
+
 
 ## Install
 ```
-go get github.com/iohub/Ahocorasick
+go get github.com/iohub/ahocorasick
 ```
 
 ## Usage
@@ -104,38 +135,6 @@ key:he val:4.880001
 key:her val:3.880001
 key:hers val:2.880001
 ```
-
-## Visualize
-
-Install graphviz
-
-```shell
-# for mac os
-brew install graphviz
-# for ubuntu
-sudo apt-get install graphviz
-```
-
-Dump structure in golang
-```go
-m := cedar.NewMatcher()
-m.Insert...
-m.Compile...
-// dump trie graph in double array trie
-m.Cedar().DumpGraph("trie.gv")
-// dump aho-corasick dfa graph in double array trie
-m.DumpGraph("dfa.gv")
-```
-Generate png 
-```shell
-dot -Tpng -o out.png trie.gv
-```
-* trie 
-<img src="https://github.com/iohub/Ahocorasick/blob/master/pictures/trie.png" alt="GitHub" /> 
-
-* aho-corasick 
-<img src="https://github.com/iohub/Ahocorasick/blob/master/pictures/dfa.png" alt="GitHub" />
-
 
 ## Chinese words segment demo
 
