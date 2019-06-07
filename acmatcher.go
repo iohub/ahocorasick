@@ -154,8 +154,7 @@ func (m *Matcher) Match(seq []byte) []MatchToken {
 
 // TokenOf extract matched token in seq
 func (m *Matcher) TokenOf(seq []byte, t MatchToken) []byte {
-	key := seq[t.At-t.KLen+1 : t.At+1]
-	return key
+	return seq[t.At-t.KLen+1 : t.At+1]
 }
 
 func (m *Matcher) matchOf(seq []byte, offset, id int) {

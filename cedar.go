@@ -518,7 +518,7 @@ func (da *Cedar) toEnd(id int) {
 
 func dumpDFAHeader(out *bytes.Buffer) {
 	out.WriteString("digraph DFA {\n")
-	out.WriteString("\tnode [color=lightblue2 style=filled]\n")
+	out.WriteString("\trankdir=LR;\n\tsize=\"7,6\"\n")
 }
 
 func dumpFinish(out *bytes.Buffer) {
@@ -527,11 +527,22 @@ func dumpFinish(out *bytes.Buffer) {
 
 func dumpDFALink(out *bytes.Buffer, fid int, tid int, val uint16, color string) {
 	r := runeOfValue(val)
-	out.WriteString(fmt.Sprintf("\t\"node(%d)\" -> \"node(%d)\" [label=\"(%c)\" color=%s]\n", fid, tid, r, color))
+	out.WriteString(fmt.Sprintf("\t\"node(%d)\" -> \"node(%d)\" [label=\"(%c)\" color=%s fontsize=\"26\"]\n", fid, tid, r, color))
 }
 
 func (da *Cedar) dumpTrie(out *bytes.Buffer) {
-	end := "END"
+	termNodes := "\tnode [shape = doublecircle color=lightsteelblue1 style=\"filled\"];"
+	for id := 0; id < da.size; id++ {
+        if pid := da.array[id].Check; pid >= 0 {
+            pbase := da.array[pid].base()
+            label := pbase ^ id
+            if label != 0 && da.isEnd(id) {
+                termNodes += fmt.Sprintf(" \"node(%d)\"", id)
+            }
+        }
+    }
+    termNodes += ";\n\tnode [shape = circle color=black style=\"\"];\n"
+    out.WriteString(termNodes)
 	for id := 0; id < da.size; id++ {
 		pid := da.array[id].Check
 		if pid < 0 {
@@ -539,13 +550,8 @@ func (da *Cedar) dumpTrie(out *bytes.Buffer) {
 		}
 		pbase := da.array[pid].base()
 		label := pbase ^ id
-		if label == 0 {
-			label = '0'
-		}
-		dumpDFALink(out, pid, id, uint16(label), "black")
-		if da.isEnd(id) {
-			out.WriteString(fmt.Sprintf("\t\"%s\" -> \"END(%d)\"\n", end, id))
-			end = fmt.Sprintf("END(%d)", id)
+		if label != 0 {
+            dumpDFALink(out, pid, id, uint16(label), "black")
 		}
 	}
 }
