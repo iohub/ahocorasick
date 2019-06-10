@@ -23,7 +23,7 @@ type node struct {
 }
 
 type nvalue struct {
-	len   int
+	Len   int
 	Value interface{}
 }
 
@@ -115,7 +115,7 @@ func (da *Cedar) keyLen(id int) int {
 		return 0
 	}
 	if v, ok := da.vals[val]; ok {
-		return v.len
+		return v.Len
 	}
 	return 0
 }

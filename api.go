@@ -87,7 +87,7 @@ func (da *Cedar) Insert(key []byte, value interface{}) error {
 	//fmt.Printf("k:%s, v:%d\n", string(key), value)
 	da.array[p].Value = k
 	da.info[p].End = true
-	da.vals[k] = nvalue{len: klen, Value: value}
+	da.vals[k] = nvalue{Len: klen, Value: value}
 	return nil
 }
 

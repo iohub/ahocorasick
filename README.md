@@ -1,9 +1,9 @@
-# Ahocorasick 
-[![Go Report Card](https://goreportcard.com/badge/github.com/iohub/Ahocorasick?style=flat-square)](https://goreportcard.com/report/github.com/iohub/Ahocorasick) [![GoCover](http://gocover.io/_badge/github.com/iohub/Ahocorasick)](http://gocover.io/github.com/iohub/Ahocorasick) [![GoDoc](https://godoc.org/github.com/iohub/Ahocorasick?status.svg)](https://godoc.org/github.com/iohub/Ahocorasick)
+# ahocorasick 
+[![Go Report Card](https://goreportcard.com/badge/github.com/iohub/ahocorasick?style=flat-square)](https://goreportcard.com/report/github.com/iohub/ahocorasick) [![GoCover](http://gocover.io/_badge/github.com/iohub/ahocorasick)](http://gocover.io/github.com/iohub/ahocorasick) [![GoDoc](https://godoc.org/github.com/iohub/ahocorasick?status.svg)](https://godoc.org/github.com/iohub/ahocorasick)
 
 <!--  [![Build Status](https://semaphoreci.com/api/v1/iohub/ahocorasick/branches/master/badge.svg)](https://semaphoreci.com/iohub/ahocorasick) -->
 
-Package `Ahocorasick` implementes fast, compact and low memory used aho-corasick algorithm based on double-array trie. and also supports visualizing inner data structures by [graphviz](http://graphviz.org) 
+Package `ahocorasick` implementes fast, compact and low memory used aho-corasick algorithm based on double-array trie. and also supports visualizing inner data structures by [graphviz](http://graphviz.org) 
 
 `cedar-go` is a [Golang](https://golang.org/) port of [cedar](http://www.tkl.iis.u-tokyo.ac.jp/~ynaga/cedar) which is written in C++ by Naoki Yoshinaga. [`cedar-go`](https://github.com/adamzy/cedar-go) currently implements the `reduced` verion of cedar. 
 This package is not thread safe if there is one goroutine doing insertions or deletions. 
@@ -36,10 +36,10 @@ dot -Tpng -o out.png trie.gv
 # example: words {"she", "he", "her", "hers"}
 ```
 * trie 
-<img src="https://github.com/iohub/Ahocorasick/blob/master/pictures/trie.png" alt="GitHub" /> 
+<img src="https://github.com/iohub/ahocorasick/blob/master/pictures/trie.png" alt="GitHub" /> 
 
 * aho-corasick 
-<img src="https://github.com/iohub/Ahocorasick/blob/master/pictures/dfa.png" alt="GitHub" />
+<img src="https://github.com/iohub/ahocorasick/blob/master/pictures/dfa.png" alt="GitHub" />
 
 
 ## Install
@@ -57,7 +57,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/iohub/Ahocorasick"
+	"github.com/iohub/ahocorasick"
 )
 
 func main() {
@@ -107,7 +107,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/iohub/Ahocorasick"
+	"github.com/iohub/ahocorasick"
 )
 
 func main() {
@@ -143,7 +143,6 @@ Build demo test
 
 ```shell
 go test .
-./Ahocorasick.test
 ```
 
 demo output
@@ -191,19 +190,17 @@ key:解放军 value:287381
 
 ## Benchmark
 
-ahocorasick golang implementation: [`cloudflare`](https://github.com/cloudflare/ahocorasick) [`anknown`](https://github.com/anknown/ahocorasick) [`iohub`](https://github.com/iohub/Ahocorasick)
+ahocorasick golang implementation: [`cloudflare`](https://github.com/cloudflare/ahocorasick) [`anknown`](https://github.com/anknown/ahocorasick) [`iohub`](https://github.com/iohub/ahocorasick)
 
-  ![image](https://github.com/iohub/Ahocorasick/blob/master/pictures/merge_from_ofoct.jpg)
+  ![image](https://github.com/iohub/ahocorasick/blob/master/pictures/merge_from_ofoct.jpg)
 
 
 How to run benchmark
 
 ```
-git clone https://github.com/iohub/Ahocorasick
+git clone https://github.com/iohub/ahocorasick
 cd benchmark
-go get github.com/cloudflare/ahocorasick
-go get github.com/anknown/ahocorasick
-go get github.com/iohub/Ahocorasick
+go get -u -v
 go build .
 ./benchmark
 ```

@@ -160,10 +160,10 @@ func (m *Matcher) TokenOf(seq []byte, t MatchToken) []byte {
 func (m *Matcher) matchOf(seq []byte, offset, id int) {
 	for e := &m.output[id]; e != nil; e = e.Link {
 		nval := m.da.vals[e.vKey]
-		if nval.len == 0 {
+		if nval.Len == 0 {
 			continue
 		}
-		m.buf.addToken(MatchToken{Value: nval.Value, At: offset, KLen: nval.len})
+		m.buf.addToken(MatchToken{Value: nval.Value, At: offset, KLen: nval.Len})
 	}
 }
 
