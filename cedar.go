@@ -52,7 +52,7 @@ func (b *block) init() {
 // Cedar encapsulates a fast and compressed double array trie for words query
 type Cedar struct {
 	array    []node
-	infos    []ninfo
+	info     []ninfo
 	blocks   []block
 	vals     map[int]nvalue
 	vkey     int
@@ -70,7 +70,7 @@ type Cedar struct {
 func NewCedar() *Cedar {
 	da := Cedar{
 		array:    make([]node, 256),
-		infos:    make([]ninfo, 256),
+		info:     make([]ninfo, 256),
 		blocks:   make([]block, 1),
 		capacity: 256,
 		size:     256,
@@ -142,7 +142,7 @@ func (da *Cedar) follow(from int, label byte) int {
 	if base < 0 || da.array[to].Check < 0 {
 		hasChild := false
 		if base >= 0 {
-			hasChild = (da.array[base^int(da.infos[from].Child)].Check == from)
+			hasChild = (da.array[base^int(da.info[from].Child)].Check == from)
 		}
 		to = da.popEnode(base, label, from)
 		da.pushSibling(from, to^int(label), label, hasChild)
@@ -188,9 +188,9 @@ func (da *Cedar) addBlock() int {
 		da.array = make([]node, da.capacity)
 		copy(da.array, oldarray)
 
-		oldNinfo := da.infos
-		da.infos = make([]ninfo, da.capacity)
-		copy(da.infos, oldNinfo)
+		oldNinfo := da.info
+		da.info = make([]ninfo, da.capacity)
+		copy(da.info, oldNinfo)
 
 		oldBlock := da.blocks
 		da.blocks = make([]block, da.capacity>>8)
@@ -273,40 +273,40 @@ func (da *Cedar) pushEnode(e int) {
 	if b.reject < da.reject[b.Num] {
 		b.reject = da.reject[b.Num]
 	}
-	da.infos[e] = ninfo{}
+	da.info[e] = ninfo{}
 }
 
 // hasChild: wherether the `from` node has children
 func (da *Cedar) pushSibling(from, base int, label byte, hasChild bool) {
-	c := &da.infos[from].Child
+	c := &da.info[from].Child
 	keepOrder := *c == 0
 	if da.ordered {
 		keepOrder = label > *c
 	}
 	if hasChild && keepOrder {
-		c = &da.infos[base^int(*c)].Sibling
+		c = &da.info[base^int(*c)].Sibling
 		for da.ordered && *c != 0 && *c < label {
-			c = &da.infos[base^int(*c)].Sibling
+			c = &da.info[base^int(*c)].Sibling
 		}
 	}
-	da.infos[base^int(label)].Sibling = *c
+	da.info[base^int(label)].Sibling = *c
 	*c = label
 }
 
 func (da *Cedar) popSibling(from, base int, label byte) {
-	c := &da.infos[from].Child
+	c := &da.info[from].Child
 	for *c != label {
-		c = &da.infos[base^int(*c)].Sibling
+		c = &da.info[base^int(*c)].Sibling
 	}
-	*c = da.infos[base^int(*c)].Sibling
+	*c = da.info[base^int(*c)].Sibling
 }
 
 func (da *Cedar) consult(baseN, baseP int, cN, cP byte) bool {
-	cN = da.infos[baseN^int(cN)].Sibling
-	cP = da.infos[baseP^int(cP)].Sibling
+	cN = da.info[baseN^int(cN)].Sibling
+	cP = da.info[baseP^int(cP)].Sibling
 	for cN != 0 && cP != 0 {
-		cN = da.infos[baseN^int(cN)].Sibling
-		cP = da.infos[baseP^int(cP)].Sibling
+		cN = da.info[baseN^int(cN)].Sibling
+		cP = da.info[baseP^int(cP)].Sibling
 	}
 	return cP != 0
 }
@@ -328,9 +328,9 @@ func (da *Cedar) child(id int, label byte) (int, error) {
 func (da *Cedar) childs(id int) []ndesc {
 	req := []ndesc{}
 	base := da.array[id].base()
-	s := da.infos[id].Child
+	s := da.info[id].Child
 	if s == 0 && base > 0 {
-		s = da.infos[base].Sibling
+		s = da.info[base].Sibling
 	}
 	for s != 0 {
 		to := base ^ int(s)
@@ -338,7 +338,7 @@ func (da *Cedar) childs(id int) []ndesc {
 			break
 		}
 		req = append(req, ndesc{ID: to, Label: s})
-		s = da.infos[to].Sibling
+		s = da.info[to].Sibling
 	}
 	return req
 }
@@ -347,12 +347,12 @@ func (da *Cedar) setChild(base int, c byte, label byte, flag bool) []byte {
 	child := make([]byte, 0, 257)
 	if c == 0 {
 		child = append(child, c)
-		c = da.infos[base^int(c)].Sibling
+		c = da.info[base^int(c)].Sibling
 	}
 	if da.ordered {
 		for c != 0 && c <= label {
 			child = append(child, c)
-			c = da.infos[base^int(c)].Sibling
+			c = da.info[base^int(c)].Sibling
 		}
 	}
 	if flag {
@@ -360,7 +360,7 @@ func (da *Cedar) setChild(base int, c byte, label byte, flag bool) []byte {
 	}
 	for c != 0 {
 		child = append(child, c)
-		c = da.infos[base^int(c)].Sibling
+		c = da.info[base^int(c)].Sibling
 	}
 	return child
 }
@@ -420,12 +420,12 @@ func (da *Cedar) resolve(fromN, baseN int, labelN byte) int {
 	fromP := da.array[toPN].Check
 	baseP := da.array[fromP].base()
 
-	flag := da.consult(baseN, baseP, da.infos[fromN].Child, da.infos[fromP].Child)
+	flag := da.consult(baseN, baseP, da.info[fromN].Child, da.info[fromP].Child)
 	var children []byte
 	if flag {
-		children = da.setChild(baseN, da.infos[fromN].Child, labelN, true)
+		children = da.setChild(baseN, da.info[fromN].Child, labelN, true)
 	} else {
-		children = da.setChild(baseP, da.infos[fromP].Child, 255, false)
+		children = da.setChild(baseP, da.info[fromP].Child, 255, false)
 	}
 	var base int
 	if len(children) == 1 {
@@ -444,16 +444,16 @@ func (da *Cedar) resolve(fromN, baseN int, labelN byte) int {
 		nbase = baseP
 	}
 	if flag && children[0] == labelN {
-		da.infos[from].Child = labelN
+		da.info[from].Child = labelN
 	}
 	da.array[from].Value = -base - 1
 	for i := 0; i < len(children); i++ {
 		to := da.popEnode(base, children[i], from)
 		newto := nbase ^ int(children[i])
 		if i == len(children)-1 {
-			da.infos[to].Sibling = 0
+			da.info[to].Sibling = 0
 		} else {
-			da.infos[to].Sibling = children[i+1]
+			da.info[to].Sibling = children[i+1]
 		}
 		if flag && newto == toPN { // new node has no child
 			continue
@@ -463,13 +463,13 @@ func (da *Cedar) resolve(fromN, baseN int, labelN byte) int {
 		n.Value = nn.Value
 		if n.Value < 0 && children[i] != 0 {
 			// this node has children, fix their check
-			c := da.infos[newto].Child
-			da.infos[to].Child = c
+			c := da.info[newto].Child
+			da.info[to].Child = c
 			da.array[n.base()^int(c)].Check = to
-			c = da.infos[n.base()^int(c)].Sibling
+			c = da.info[n.base()^int(c)].Sibling
 			for c != 0 {
 				da.array[n.base()^int(c)].Check = to
-				c = da.infos[n.base()^int(c)].Sibling
+				c = da.info[n.base()^int(c)].Sibling
 			}
 		}
 		if !flag && newto == fromN { // parent node moved
@@ -477,7 +477,7 @@ func (da *Cedar) resolve(fromN, baseN int, labelN byte) int {
 		}
 		if !flag && newto == toPN {
 			da.pushSibling(fromN, toPN^int(labelN), labelN, true)
-			da.infos[newto].Child = 0
+			da.info[newto].Child = 0
 			nn.Value = valueLimit
 			nn.Check = fromN
 		} else {
@@ -506,14 +506,14 @@ func runeOfValue(v uint16) rune {
 }
 
 func (da *Cedar) isEnd(id int) bool {
-	if da.infos[id].End {
+	if da.info[id].End {
 		return true
 	}
-	return da.infos[id].Child == 0
+	return da.info[id].Child == 0
 }
 
 func (da *Cedar) toEnd(id int) {
-	da.infos[id].End = true
+	da.info[id].End = true
 }
 
 func dumpDFAHeader(out *bytes.Buffer) {
@@ -533,16 +533,16 @@ func dumpDFALink(out *bytes.Buffer, fid int, tid int, val uint16, color string) 
 func (da *Cedar) dumpTrie(out *bytes.Buffer) {
 	termNodes := "\tnode [shape = doublecircle color=lightsteelblue1 style=\"filled\"];"
 	for id := 0; id < da.size; id++ {
-        if pid := da.array[id].Check; pid >= 0 {
-            pbase := da.array[pid].base()
-            label := pbase ^ id
-            if label != 0 && da.isEnd(id) {
-                termNodes += fmt.Sprintf(" \"node(%d)\"", id)
-            }
-        }
-    }
-    termNodes += ";\n\tnode [shape = circle color=black style=\"\"];\n"
-    out.WriteString(termNodes)
+		if pid := da.array[id].Check; pid >= 0 {
+			pbase := da.array[pid].base()
+			label := pbase ^ id
+			if label != 0 && da.isEnd(id) {
+				termNodes += fmt.Sprintf(" \"node(%d)\"", id)
+			}
+		}
+	}
+	termNodes += ";\n\tnode [shape = circle color=black style=\"\"];\n"
+	out.WriteString(termNodes)
 	for id := 0; id < da.size; id++ {
 		pid := da.array[id].Check
 		if pid < 0 {
@@ -551,7 +551,7 @@ func (da *Cedar) dumpTrie(out *bytes.Buffer) {
 		pbase := da.array[pid].base()
 		label := pbase ^ id
 		if label != 0 {
-            dumpDFALink(out, pid, id, uint16(label), "black")
+			dumpDFALink(out, pid, id, uint16(label), "black")
 		}
 	}
 }

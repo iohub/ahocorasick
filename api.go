@@ -86,7 +86,7 @@ func (da *Cedar) Insert(key []byte, value interface{}) error {
 	p := da.get(key, 0, 0)
 	//fmt.Printf("k:%s, v:%d\n", string(key), value)
 	da.array[p].Value = k
-	da.infos[p].End = true
+	da.info[p].End = true
 	da.vals[k] = nvalue{len: klen, Value: value}
 	return nil
 }
@@ -126,7 +126,7 @@ func (da *Cedar) Delete(key []byte) error {
 		label := byte(to ^ base)
 
 		// if `to` has sibling, remove `to` from the sibling list, then stop
-		if da.infos[to].Sibling != 0 || da.infos[from].Child != label {
+		if da.info[to].Sibling != 0 || da.info[from].Child != label {
 			// delete the label from the child ring first
 			da.popSibling(from, base, label)
 			// then release the current node `to` to the empty node ring
@@ -216,9 +216,9 @@ func (da *Cedar) PrefixPredict(key []byte, num int) (ids []int) {
 }
 
 func (da *Cedar) begin(from int) (to int, err error) {
-	for c := da.infos[from].Child; c != 0; {
+	for c := da.info[from].Child; c != 0; {
 		to = da.array[from].base() ^ int(c)
-		c = da.infos[to].Child
+		c = da.info[to].Child
 		from = to
 	}
 	if da.array[from].base() > 0 {
@@ -228,10 +228,10 @@ func (da *Cedar) begin(from int) (to int, err error) {
 }
 
 func (da *Cedar) next(from int, root int) (to int, err error) {
-	c := da.infos[from].Sibling
+	c := da.info[from].Sibling
 	for c == 0 && from != root && da.array[from].Check >= 0 {
 		from = da.array[from].Check
-		c = da.infos[from].Sibling
+		c = da.info[from].Sibling
 	}
 	if from == root {
 		return 0, ErrNoPath
