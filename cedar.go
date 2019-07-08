@@ -12,8 +12,6 @@ const (
 	valueLimit = int(^uint(0) >> 1)
 	CJKZhMin   = '\u4E00'
 	CJKZhMax   = '\u9FFF'
-	acsiiMax   = '\u007F'
-	asciiA     = 'A'
 	asciiz     = 'z'
 )
 
@@ -107,17 +105,6 @@ func (da *Cedar) vKey() int {
 	}
 	da.vkey = k
 	return k
-}
-
-func (da *Cedar) keyLen(id int) int {
-	val, err := da.vKeyOf(id)
-	if err != nil {
-		return 0
-	}
-	if v, ok := da.vals[val]; ok {
-		return v.Len
-	}
-	return 0
 }
 
 // Get value by key, insert the key if not exist
@@ -488,14 +475,6 @@ func (da *Cedar) resolve(fromN, baseN int, labelN byte) int {
 		return base ^ int(labelN)
 	}
 	return toPN
-}
-
-func valueOfRune(r rune) uint16 {
-	v := uint32(r)
-	if v >= CJKZhMin {
-		return uint16(v - CJKZhMin + asciiz + 1)
-	}
-	return uint16(v)
 }
 
 func runeOfValue(v uint16) rune {
