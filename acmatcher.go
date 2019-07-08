@@ -152,6 +152,41 @@ func (m *Matcher) Match(seq []byte) []MatchToken {
 	return tb[:m.buf.ti]
 }
 
+// MatchVals works like Match(), except it returns the unique Values associated with the matching keywords.
+func (m *Matcher) MatchVals(seq []byte) (ret []interface{}) {
+	if !m.compiled {
+		m.Compile()
+	}
+	nid := 0
+	da := m.da
+	m.buf.reset()
+
+	nids := map[int]bool{}
+	for _, b := range seq {
+		for {
+			if da.hasLabel(nid, b) {
+				nid, _ = da.child(nid, b)
+				if da.isEnd(nid) {
+					nids[nid] = true
+				}
+				break
+			}
+			if nid == 0 {
+				break
+			}
+			nid = m.fails[nid]
+		}
+	}
+
+	for nid := range nids {
+		vkey, _ := da.vKeyOf(nid)
+		val := da.vals[vkey].Value
+		ret = append(ret, val)
+	}
+
+	return ret
+}
+
 // TokenOf extract matched token in seq
 func (m *Matcher) TokenOf(seq []byte, t MatchToken) []byte {
 	return seq[t.At-t.KLen+1 : t.At+1]
