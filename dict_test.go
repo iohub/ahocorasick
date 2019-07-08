@@ -12,8 +12,6 @@ type item struct {
 	value int
 }
 
-var trie = NewCedar()
-
 func loadDict() []item {
 	var dict []item
 	f, err := os.Open("testdata/dict.txt")
