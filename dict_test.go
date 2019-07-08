@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"testing"
 )
 
 type item struct {
@@ -12,11 +13,15 @@ type item struct {
 	value int
 }
 
-func loadDict() []item {
+var trie = NewCedar()
+
+func loadDict(t *testing.T) []item {
+	t.Helper()
+
 	var dict []item
 	f, err := os.Open("testdata/dict.txt")
 	if err != nil {
-		panic("failed to open testdata/dict.txt")
+		t.Fatalf("failed to open testdata/dict.txt: %v", err)
 	}
 
 	defer f.Close()
