@@ -63,17 +63,17 @@ func calcTime(start time.Time, name string) {
 	fmt.Printf("%s took %s\n", name, elapsed)
 }
 
-func testIohub(dictName, textName string) {
+func testIohub(t *testing.T, dictName, textName string) {
+	t.Helper()
+
 	dict, err := readBytes(dictName)
 	if err != nil {
-		fmt.Println(err)
-		return
+		t.Fatal(err)
 	}
 
 	content, err := ioutil.ReadFile(textName)
 	if err != nil {
-		fmt.Println(err)
-		return
+		t.Fatal(err)
 	}
 	m := NewMatcher()
 
@@ -104,14 +104,14 @@ func testIohub(dictName, textName string) {
 func TestWithDict(t *testing.T) {
 	zhDict := "./benchmark/cn/dictionary.txt"
 	zhText := "./benchmark/cn/text.txt"
-	testIohub(zhDict, zhText)
+	testIohub(t, zhDict, zhText)
 }
 
 func TestMatcher(t *testing.T) {
 	fmt.Printf("\ntesting Insert & Compile & Search in big dictionary...\n")
 	m := NewMatcher()
 	fmt.Println("Loading...")
-	dict := loadDict()
+	dict := loadDict(t)
 	size := len(dict)
 	fmt.Printf("%d key-value pairs in dictionary\n", size)
 	fmt.Println("Inserting...")

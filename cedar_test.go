@@ -41,4 +41,3 @@ func TestInsertFloat(t *testing.T) {
 	}
 	cd.DumpGraph("datrie.gv")
 }
-
