@@ -105,7 +105,7 @@ func (m *Matcher) Cedar() *Cedar {
 func (m *Matcher) Compile() {
 	nLen := len(m.da.array)
 	if m.compiled {
-		panic(ErrAlreadyCompiled)
+		return
 	}
 	m.fails = make([]int, nLen)
 	for id := 0; id < nLen; id++ {
@@ -124,7 +124,7 @@ func (m *Matcher) Compile() {
 // Match multiple subsequence in seq and return tokens
 func (m *Matcher) Match(seq []byte) []MatchToken {
 	if !m.compiled {
-		panic(ErrNotCompile)
+		m.Compile()
 	}
 	nid := 0
 	da := m.da
