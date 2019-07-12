@@ -90,7 +90,7 @@ func testIohub(t *testing.T, dictName, textName string) {
 		clen := len(content)
 		tlen := 0
 		for s := 0; clen > 0; s += tlen {
-			tlen := TokenBufferSize / 2
+			tlen := DefaultTokenBufferSize / 2
 			if clen < tlen {
 				tlen = clen
 			}

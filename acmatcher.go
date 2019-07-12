@@ -7,10 +7,8 @@ import (
 )
 
 const (
-	// TokenBufferSize size of match token buffer
-	TokenBufferSize = 4096
-	// MatchBufferSize size of match position buffer
-	MatchBufferSize = 4096
+	DefaultTokenBufferSize = 4096
+	DefaultMatchBufferSize = 4096
 )
 
 // Matcher Aho Corasick Matcher
@@ -52,8 +50,8 @@ func NewMatcher() *Matcher {
 		da:       NewCedar(),
 		compiled: false,
 		buf: &mbuf{
-			token: make([]MatchToken, MatchBufferSize),
-			at:    make([]matchAt, MatchBufferSize),
+			token: make([]MatchToken, DefaultTokenBufferSize),
+			at:    make([]matchAt, DefaultMatchBufferSize),
 			ti:    0,
 			ai:    0,
 		},
@@ -65,16 +63,30 @@ func (mb *mbuf) reset() {
 }
 
 func (mb *mbuf) addToken(mt MatchToken) {
-	if mb.ti >= TokenBufferSize {
-		panic("ERROR buffer overflow")
+	if mb.ti >= len(mb.token) {
+		mb.grow()
 	}
 	mb.token[mb.ti] = mt
 	mb.ti++
 }
 
+func (mb *mbuf) grow() {
+	idx := mb.ai
+	if mb.ti > idx {
+		idx = mb.ti
+	}
+	if mb.ai <= idx {
+		mb.at = append(mb.at, make([]matchAt, idx, idx)...)
+	}
+	if mb.ti <= idx {
+		mb.token = append(mb.token, make([]MatchToken, idx, idx)...)
+	}
+}
+
+// safely grow
 func (mb *mbuf) addAt(mt matchAt) {
-	if mb.ai >= MatchBufferSize {
-		panic("ERROR buffer overflow")
+	if mb.ai >= len(mb.at) {
+		mb.grow()
 	}
 	mb.at[mb.ai] = mt
 	mb.ai++

@@ -15,9 +15,9 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/anknown/ahocorasick"
+	goahocorasick "github.com/anknown/ahocorasick"
 	"github.com/cloudflare/ahocorasick"
-	"github.com/iohub/ahocorasick"
+	cedar "github.com/iohub/ahocorasick"
 )
 
 const zhDict = "./cn/dictionary.txt"
@@ -27,7 +27,7 @@ const enText = "./en/text.txt"
 
 func calcTime(start time.Time, name string) {
 	elapsed := time.Since(start)
-	fmt.Printf("%s took %s\n", name, elapsed)
+	fmt.Printf("%s\t %s\n", name, elapsed)
 }
 
 func readBytes(filename string) ([][]byte, error) {
@@ -101,7 +101,7 @@ func testCloudflare(fdict, ftext string) {
 	runtime.GC()
 	runtime.ReadMemStats(mem)
 	after := mem.HeapAlloc
-	fmt.Printf("cloudflare/ahocorasick [mem] took %d KBytes\n", (after-before)/1024)
+	fmt.Printf("cloudflare/ahocorasick [mem]\t %d KBytes\n", (after-before)/1024)
 }
 
 func testAnknown(fdict, ftext string) {
@@ -140,7 +140,7 @@ func testAnknown(fdict, ftext string) {
 	runtime.GC()
 	runtime.ReadMemStats(mem)
 	after := mem.HeapAlloc
-	fmt.Printf("anknown/ahocorasick [mem] took %d KBytes\n", (after-before)/1024)
+	fmt.Printf("anknown/ahocorasick [mem]\t %d KBytes\n", (after-before)/1024)
 }
 
 func testIohub(fdict, ftext string) {
@@ -175,7 +175,7 @@ func testIohub(fdict, ftext string) {
 		clen := len(content)
 		tlen := 0
 		for s := 0; clen > 0; s += tlen {
-			tlen := cedar.TokenBufferSize / 2
+			tlen := cedar.DefaultTokenBufferSize / 2
 			if clen < tlen {
 				tlen = clen
 			}
@@ -188,7 +188,7 @@ func testIohub(fdict, ftext string) {
 	runtime.GC()
 	runtime.ReadMemStats(mem)
 	after := mem.HeapAlloc
-	fmt.Printf("iohub/ahocorasick [mem] took %d KBytes\n", (after-before)/1024)
+	fmt.Printf("iohub/ahocorasick [mem]\t\t %d KBytes\n", (after-before)/1024)
 }
 
 func main() {
