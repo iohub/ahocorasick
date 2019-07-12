@@ -14,16 +14,17 @@ const (
 // Matcher Aho Corasick Matcher
 type Matcher struct {
 	da       *Cedar
-	output   []outNode
+	outputs  []outNode
 	fails    []int
 	compiled bool
+	matched  bool
 	buf      *mbuf
 }
 
 type mbuf struct {
-	token  []MatchToken
-	at     []matchAt
-	ti, ai int
+	token          []MatchToken
+	at             []matchAt
+	nextIdx, atIdx int
 }
 
 // MatchToken matched words in Aho Corasick Matcher
@@ -50,46 +51,30 @@ func NewMatcher() *Matcher {
 		da:       NewCedar(),
 		compiled: false,
 		buf: &mbuf{
-			token: make([]MatchToken, DefaultTokenBufferSize),
-			at:    make([]matchAt, DefaultMatchBufferSize),
-			ti:    0,
-			ai:    0,
+			token:   make([]MatchToken, DefaultTokenBufferSize),
+			at:      make([]matchAt, DefaultMatchBufferSize),
+			nextIdx: 0,
+			atIdx:   0,
 		},
 	}
 }
 
 func (mb *mbuf) reset() {
-	mb.ai, mb.ti = 0, 0
-}
-
-func (mb *mbuf) addToken(mt MatchToken) {
-	if mb.ti >= len(mb.token) {
-		mb.grow()
-	}
-	mb.token[mb.ti] = mt
-	mb.ti++
+	mb.nextIdx, mb.atIdx = 0, 0
 }
 
 func (mb *mbuf) grow() {
-	idx := mb.ai
-	if mb.ti > idx {
-		idx = mb.ti
-	}
-	if mb.ai <= idx {
-		mb.at = append(mb.at, make([]matchAt, idx, idx)...)
-	}
-	if mb.ti <= idx {
-		mb.token = append(mb.token, make([]MatchToken, idx, idx)...)
-	}
+	idx := mb.atIdx
+	mb.at = append(mb.at, make([]matchAt, idx, idx)...)
 }
 
 // safely grow
 func (mb *mbuf) addAt(mt matchAt) {
-	if mb.ai >= len(mb.at) {
+	if mb.atIdx >= len(mb.at) {
 		mb.grow()
 	}
-	mb.at[mb.ai] = mt
-	mb.ai++
+	mb.at[mb.atIdx] = mt
+	mb.atIdx++
 }
 
 // DumpGraph dumps aho-corasick dfa structures to graphviz file
@@ -98,7 +83,7 @@ func (m *Matcher) DumpGraph(fname string) {
 	da := m.da
 	dumpDFAHeader(out)
 	da.dumpTrie(out)
-	m.dumpDFAFail(out)
+	m.dumpDFAFails(out)
 	dumpFinish(out)
 	ioutil.WriteFile(fname, out.Bytes(), 0666)
 }
@@ -115,16 +100,16 @@ func (m *Matcher) Cedar() *Cedar {
 
 // Compile trie to aho-corasick
 func (m *Matcher) Compile() {
-	nLen := len(m.da.array)
 	if m.compiled {
 		return
 	}
+	nLen := len(m.da.array)
 	m.fails = make([]int, nLen)
 	for id := 0; id < nLen; id++ {
 		m.fails[id] = -1
 	}
 
-	m.output = make([]outNode, nLen)
+	m.outputs = make([]outNode, nLen)
 	m.fails[0] = 0
 	// build fail function, generate NFA
 	m.buildFails()
@@ -134,7 +119,7 @@ func (m *Matcher) Compile() {
 }
 
 // Match multiple subsequence in seq and return tokens
-func (m *Matcher) Match(seq []byte) []MatchToken {
+func (m *Matcher) Match(seq []byte) {
 	if !m.compiled {
 		m.Compile()
 	}
@@ -156,12 +141,28 @@ func (m *Matcher) Match(seq []byte) []MatchToken {
 			nid = m.fails[nid]
 		}
 	}
-	mb := m.buf.at
-	for i := 0; i < m.buf.ai; i++ {
-		m.matchOf(seq, mb[i].At, mb[i].OutID)
+	m.matched = true
+}
+
+func (m *Matcher) HasNext() bool {
+	return m.matched && m.buf.nextIdx < m.buf.atIdx
+}
+
+func (m *Matcher) NextMatchItem(content []byte) []MatchToken {
+	token := []MatchToken{}
+	if !m.HasNext() {
+		return token
 	}
-	tb := m.buf.token
-	return tb[:m.buf.ti]
+	at := m.buf.at[m.buf.nextIdx]
+	for e := &m.outputs[at.OutID]; e != nil; e = e.Link {
+		nVal := m.da.vals[e.vKey]
+		if nVal.Len == 0 {
+			continue
+		}
+		token = append(token, MatchToken{Value: nVal.Value, At: at.At, KLen: nVal.Len})
+	}
+	m.buf.nextIdx++
+	return token
 }
 
 // TokenOf extract matched token in seq
@@ -169,18 +170,8 @@ func (m *Matcher) TokenOf(seq []byte, t MatchToken) []byte {
 	return seq[t.At-t.KLen+1 : t.At+1]
 }
 
-func (m *Matcher) matchOf(seq []byte, offset, id int) {
-	for e := &m.output[id]; e != nil; e = e.Link {
-		nval := m.da.vals[e.vKey]
-		if nval.Len == 0 {
-			continue
-		}
-		m.buf.addToken(MatchToken{Value: nval.Value, At: offset, KLen: nval.Len})
-	}
-}
-
 func (m *Matcher) addOutput(nid, fid int) {
-	m.output[nid].Link = &m.output[fid]
+	m.outputs[nid].Link = &m.outputs[fid]
 }
 
 func (m *Matcher) buildOutputs() {
@@ -210,7 +201,7 @@ func (m *Matcher) buildFails() {
 		nid := e.Value.(ndesc).ID
 		if da.isEnd(nid) {
 			vk, _ := da.vKeyOf(nid)
-			m.output[nid].vKey = vk
+			m.outputs[nid].vKey = vk
 		}
 		chds := da.childs(nid)
 		for _, c := range chds {
@@ -227,7 +218,7 @@ func (m *Matcher) buildFails() {
 	}
 }
 
-func (m *Matcher) dumpDFAFail(out *bytes.Buffer) {
+func (m *Matcher) dumpDFAFails(out *bytes.Buffer) {
 	nLen := len(m.da.array)
 	for i := 0; i < nLen; i++ {
 		fs := m.fails[i]
