@@ -29,7 +29,7 @@ func TestDumpMatcher(t *testing.T) {
 	for m.HasNext() {
 		items := m.NextMatchItem(seq)
 		for _, itr := range items {
-			key := m.TokenOf(seq, itr)
+			key := m.Key(seq, itr)
 			fmt.Printf("key:%s value:%d\n", key, itr.Value.(int))
 		}
 	}
@@ -138,7 +138,7 @@ func TestMatcher(t *testing.T) {
 	m.Match(seq)
 	for m.HasNext() {
 		for _, item := range m.NextMatchItem(seq) {
-			key := m.TokenOf(seq, item)
+			key := m.Key(seq, item)
 			fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
 		}
 	}
@@ -160,7 +160,7 @@ func TestHugeMatching(t *testing.T) {
 	for m.HasNext() {
 		for _, item := range m.NextMatchItem(seq) {
 			ix++
-			key := m.TokenOf(seq, item)
+			key := m.Key(seq, item)
 			if ix%1000 == 0 && len(key) != 0 {
 				// fmt.Printf("key Len:%v value:%d\n", len(key), item.Value.(int))
 			}

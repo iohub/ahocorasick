@@ -165,8 +165,8 @@ func (m *Matcher) NextMatchItem(content []byte) []MatchToken {
 	return token
 }
 
-// TokenOf extract matched token in seq
-func (m *Matcher) TokenOf(seq []byte, t MatchToken) []byte {
+// Key extract matched key in seq
+func (m *Matcher) Key(seq []byte, t MatchToken) []byte {
 	return seq[t.At-t.KLen+1 : t.At+1]
 }
 
