@@ -145,9 +145,9 @@ func TestMatcher(t *testing.T) {
 }
 
 func TestHugeMatching(t *testing.T) {
-	fmt.Printf("\ntesting in huge memory case...\n")
 	m := NewMatcher()
-	cLen := 1024 * 24
+	cLen := 1024 * 12
+	fmt.Printf("\ntesting in near [%v]^2 matchs case...\n", cLen)
 	content := "a"
 	for ix := 0; ix < cLen; ix++ {
 		m.Insert([]byte(content), ix)
@@ -167,5 +167,4 @@ func TestHugeMatching(t *testing.T) {
 		}
 	}
 	fmt.Println("done")
-	time.Sleep(60 * time.Second)
 }
