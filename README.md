@@ -77,10 +77,14 @@ func main() {
 	seq := []byte("hershertongher")
 	fmt.Printf("searching %s\n", string(seq))
 	req := m.Match(seq)
-	for _, item := range req {
-		key := m.Key(seq, item)
-		fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
-	}
+        m.Match(seq)
+        for m.HasNext() {
+            items := m.NextMatchItem(seq)
+            for _, itr := range items {
+                key := m.Key(seq, itr)
+                fmt.Printf("key:%s value:%d\n", key, itr.Value.(int))
+            }
+        }
 }
 
 ```
