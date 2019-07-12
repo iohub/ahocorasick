@@ -25,10 +25,13 @@ func TestDumpMatcher(t *testing.T) {
 	m.DumpGraph("dfa.gv")
 	seq := []byte("hershertongher")
 	fmt.Printf("searching %s\n", string(seq))
-	req := m.Match(seq)
-	for _, item := range req {
-		key := m.TokenOf(seq, item)
-		fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
+	m.Match(seq)
+	for m.HasNext() {
+		items := m.NextMatchItem(seq)
+		for _, itr := range items {
+			key := m.Key(seq, itr)
+			fmt.Printf("key:%s value:%d\n", key, itr.Value.(int))
+		}
 	}
 }
 
@@ -132,9 +135,37 @@ func TestMatcher(t *testing.T) {
 	// m.DumpGraph("bigdfa.py")
 	seq := []byte("一丁不识一丁点C++的T桖中华人民共和国人民解放军轰炸南京长江大桥")
 	fmt.Printf("Searching %s\n", string(seq))
-	req := m.Match(seq)
-	for _, item := range req {
-		key := m.TokenOf(seq, item)
-		fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
+	m.Match(seq)
+	for m.HasNext() {
+		for _, item := range m.NextMatchItem(seq) {
+			key := m.Key(seq, item)
+			fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
+		}
 	}
+}
+
+func TestHugeMatching(t *testing.T) {
+	fmt.Printf("\ntesting in huge memory case...\n")
+	m := NewMatcher()
+	cLen := 1024 * 24
+	content := "a"
+	for ix := 0; ix < cLen; ix++ {
+		m.Insert([]byte(content), ix)
+		content += "a"
+	}
+	m.Compile()
+	seq := []byte(content)
+	m.Match(seq)
+	ix := 0
+	for m.HasNext() {
+		for _, item := range m.NextMatchItem(seq) {
+			ix++
+			key := m.Key(seq, item)
+			if ix%1000 == 0 && len(key) != 0 {
+				// fmt.Printf("key Len:%v value:%d\n", len(key), item.Value.(int))
+			}
+		}
+	}
+	fmt.Println("done")
+	time.Sleep(60 * time.Second)
 }
