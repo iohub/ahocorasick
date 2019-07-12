@@ -76,7 +76,6 @@ func main() {
 	m.DumpGraph("dfa.gv")
 	seq := []byte("hershertongher")
 	fmt.Printf("searching %s\n", string(seq))
-	req := m.Match(seq)
         m.Match(seq)
         for m.HasNext() {
             items := m.NextMatchItem(seq)
