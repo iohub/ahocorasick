@@ -84,6 +84,8 @@ func main() {
                 fmt.Printf("key:%s value:%d\n", key, itr.Value.(int))
             }
         }
+	// release buffer to sync.Pool
+	resp.Release()
 }
 
 ```
