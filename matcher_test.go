@@ -25,14 +25,15 @@ func TestDumpMatcher(t *testing.T) {
 	m.DumpGraph("dfa.gv")
 	seq := []byte("hershertongher")
 	fmt.Printf("searching %s\n", string(seq))
-	m.Match(seq)
-	for m.HasNext() {
-		items := m.NextMatchItem(seq)
+	resp := m.Match(seq)
+	for resp.HasNext() {
+		items := resp.NextMatchItem(seq)
 		for _, itr := range items {
 			key := m.Key(seq, itr)
 			fmt.Printf("key:%s value:%d\n", key, itr.Value.(int))
 		}
 	}
+	resp.Release()
 }
 
 func timeTrack(start time.Time, name string) {
@@ -135,13 +136,14 @@ func TestMatcher(t *testing.T) {
 	// m.DumpGraph("bigdfa.py")
 	seq := []byte("一丁不识一丁点C++的T桖中华人民共和国人民解放军轰炸南京长江大桥")
 	fmt.Printf("Searching %s\n", string(seq))
-	m.Match(seq)
-	for m.HasNext() {
-		for _, item := range m.NextMatchItem(seq) {
+	resp := m.Match(seq)
+	for resp.HasNext() {
+		for _, item := range resp.NextMatchItem(seq) {
 			key := m.Key(seq, item)
 			fmt.Printf("key:%s value:%d\n", key, item.Value.(int))
 		}
 	}
+	resp.Release()
 }
 
 func TestHugeMatching(t *testing.T) {
@@ -155,10 +157,10 @@ func TestHugeMatching(t *testing.T) {
 	}
 	m.Compile()
 	seq := []byte(content)
-	m.Match(seq)
+	resp := m.Match(seq)
 	ix := 0
-	for m.HasNext() {
-		for _, item := range m.NextMatchItem(seq) {
+	for resp.HasNext() {
+		for _, item := range resp.NextMatchItem(seq) {
 			ix++
 			key := m.Key(seq, item)
 			if ix%1000 == 0 && len(key) != 0 {
@@ -166,5 +168,6 @@ func TestHugeMatching(t *testing.T) {
 			}
 		}
 	}
+	resp.Release()
 	fmt.Println("done")
 }

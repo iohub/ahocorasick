@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"container/list"
 	"io/ioutil"
+	"sync"
 )
 
 const (
@@ -17,12 +18,14 @@ type Matcher struct {
 	outputs  []outNode
 	fails    []int
 	compiled bool
-	matched  bool
-	buf      *mbuf
+}
+
+type Response struct {
+	ac  *Matcher
+	buf *mbuf
 }
 
 type mbuf struct {
-	token          []MatchToken
 	at             []matchAt
 	nextIdx, atIdx int
 }
@@ -45,17 +48,36 @@ type outNode struct {
 	vKey int
 }
 
+var bufPool = sync.Pool{
+
+	New: func() interface{} {
+		return &mbuf{
+			at:      make([]matchAt, DefaultMatchBufferSize),
+			nextIdx: 0,
+			atIdx:   0,
+		}
+	},
+}
+
+func NewResponse(ac *Matcher) *Response {
+	resp := &Response{
+		ac:  ac,
+		buf: bufPool.Get().(*mbuf),
+	}
+	resp.buf.reset()
+	return resp
+}
+
+func (r *Response) Release() {
+	r.buf.reset()
+	bufPool.Put(r.buf)
+}
+
 // NewMatcher new an aho corasick matcher
 func NewMatcher() *Matcher {
 	return &Matcher{
 		da:       NewCedar(),
 		compiled: false,
-		buf: &mbuf{
-			token:   make([]MatchToken, DefaultTokenBufferSize),
-			at:      make([]matchAt, DefaultMatchBufferSize),
-			nextIdx: 0,
-			atIdx:   0,
-		},
 	}
 }
 
@@ -119,19 +141,19 @@ func (m *Matcher) Compile() {
 }
 
 // Match multiple subsequence in seq and return tokens
-func (m *Matcher) Match(seq []byte) {
+func (m *Matcher) Match(seq []byte) *Response {
 	if !m.compiled {
 		m.Compile()
 	}
 	nid := 0
 	da := m.da
-	m.buf.reset()
+	resp := NewResponse(m)
 	for i, b := range seq {
 		for {
 			if da.hasLabel(nid, b) {
 				nid, _ = da.child(nid, b)
 				if da.isEnd(nid) {
-					m.buf.addAt(matchAt{OutID: nid, At: i})
+					resp.buf.addAt(matchAt{OutID: nid, At: i})
 				}
 				break
 			}
@@ -141,27 +163,27 @@ func (m *Matcher) Match(seq []byte) {
 			nid = m.fails[nid]
 		}
 	}
-	m.matched = true
+	return resp
 }
 
-func (m *Matcher) HasNext() bool {
-	return m.matched && m.buf.nextIdx < m.buf.atIdx
+func (r *Response) HasNext() bool {
+	return r.buf.nextIdx < r.buf.atIdx
 }
 
-func (m *Matcher) NextMatchItem(content []byte) []MatchToken {
+func (r *Response) NextMatchItem(content []byte) []MatchToken {
 	token := []MatchToken{}
-	if !m.HasNext() {
+	if !r.HasNext() {
 		return token
 	}
-	at := m.buf.at[m.buf.nextIdx]
-	for e := &m.outputs[at.OutID]; e != nil; e = e.Link {
-		nVal := m.da.vals[e.vKey]
+	at := r.buf.at[r.buf.nextIdx]
+	for e := &r.ac.outputs[at.OutID]; e != nil; e = e.Link {
+		nVal := r.ac.da.vals[e.vKey]
 		if nVal.Len == 0 {
 			continue
 		}
 		token = append(token, MatchToken{Value: nVal.Value, At: at.At, KLen: nVal.Len})
 	}
-	m.buf.nextIdx++
+	r.buf.nextIdx++
 	return token
 }
 
