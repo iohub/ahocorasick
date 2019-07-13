@@ -76,9 +76,9 @@ func main() {
 	m.DumpGraph("dfa.gv")
 	seq := []byte("hershertongher")
 	fmt.Printf("searching %s\n", string(seq))
-        m.Match(seq)
-        for m.HasNext() {
-            items := m.NextMatchItem(seq)
+        resp := m.Match(seq)
+        for resp.HasNext() {
+            items := resp.NextMatchItem(seq)
             for _, itr := range items {
                 key := m.Key(seq, itr)
                 fmt.Printf("key:%s value:%d\n", key, itr.Value.(int))
