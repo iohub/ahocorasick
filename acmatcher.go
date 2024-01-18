@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"container/list"
 	"io/ioutil"
+	"strings"
 	"sync"
 )
 
@@ -112,6 +113,10 @@ func (m *Matcher) DumpGraph(fname string) {
 
 // Insert a byte sequence to double array trie inner matcher
 func (m *Matcher) Insert(bs []byte, val interface{}) {
+	if strings.TrimSpace(string(bs)) == "" {
+		// ignore empty string.
+		return
+	}
 	m.da.Insert(bs, val)
 }
 

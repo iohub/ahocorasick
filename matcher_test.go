@@ -134,7 +134,7 @@ func TestMatcher(t *testing.T) {
 		m.Compile()
 	}()
 	// m.DumpGraph("bigdfa.py")
-	seq := []byte("一丁不识一丁点C++的T桖中华人民共和国人民解放军轰炸南京长江大桥")
+	seq := []byte("一丁点C++的T桖中华人民共和国人民解放军军队看守南京长江大桥")
 	fmt.Printf("Searching %s\n", string(seq))
 	resp := m.Match(seq)
 	for resp.HasNext() {

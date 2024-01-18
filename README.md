@@ -147,20 +147,15 @@ key:hers val:2.880001
 Build demo test
 
 ```shell
-go test .
+go test -run TestMatcher
+
 ```
 
 demo output
 ```go
-Searching 一丁不识一丁点C++的T桖中华人民共和国人民解放军轰炸南京长江大桥
+Searching 一丁点C++的T桖中华人民共和国人民解放军军队看守南京长江大桥
+
 key:一 value:7
-key:一丁 value:17
-key:丁 value:3317
-key:一丁不识 value:18
-key:不识 value:9890
-key:识 value:290279
-key:一 value:7
-key:不识一丁 value:9891
 key:一丁 value:17
 key:丁 value:3317
 key:一丁点 value:19
@@ -189,7 +184,28 @@ key:解放 value:287374
 key:放 value:160645
 key:人民解放军 value:25927
 key:解放军 value:287381
-...
+key:军 value:46587
+key:军军 value:46669
+key:军 value:46587
+key:军队 value:46885
+key:队 value:323587
+key:看 value:236540
+key:看守 value:236604
+key:守 value:108752
+key:南 value:64826
+key:南京 value:64860
+key:京 value:24978
+key:长 value:321363
+key:长江 value:321685
+key:江 value:198725
+key:南京长江大桥 value:64899
+key:长江大桥 value:321699
+key:大桥 value:98737
+key:桥 value:187704
+PASS
+ok  	github.com/iohub/ahocorasick	0.402s
+
+
 ```
 
 
